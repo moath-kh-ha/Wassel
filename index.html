@@ -1330,10 +1330,11 @@
      </form>
     </div>
     <div class="dashboard-section">
-     <h3>📋 الطلبات الأخيرة</h3>
-     <div class="orders-list" id="agentOrders">
-      <!-- Example/demo orders removed. Orders received from the System will be rendered here. -->
-      <div class="empty-note">لا توجد طلبات جديدة حالياً</div>
+     <h3>📋 طلباتي (التتبع)</h3>
+     <div id="agentOrdersMessage"></div>
+     <div class="orders-list" id="agentOrdersList">
+      <!-- Agent's orders will be loaded via polling -->
+      <div class="empty-note">لم تقم بإنشاء أي طلبات حتى الآن</div>
      </div>
     </div>
     </div><!-- Merchant Dashboard -->
@@ -1385,10 +1386,18 @@
       </div>
      </div>
     <div class="dashboard-section">
-     <h3>📦 الطلبات الجديدة</h3>
-     <div class="orders-list" id="merchantOrders">
-      <!-- Example/demo orders removed. Orders received from the System will be rendered here. -->
-      <div class="empty-note">لا توجد طلبات جديدة حالياً</div>
+     <h3>📦 الطلبات القادمة (قيد الطريق)</h3>
+     <div id="merchantOrdersMessage"></div>
+     <div class="orders-list" id="merchantIncomingOrders">
+      <!-- Incoming orders will be loaded via polling -->
+      <div class="empty-note">لا توجد طلبات قادمة حالياً</div>
+     </div>
+    </div>
+    <div class="dashboard-section">
+     <h3>✅ الطلبات المستلمة</h3>
+     <div class="orders-list" id="merchantReceivedOrders">
+      <!-- Received orders will be displayed here -->
+      <div class="empty-note">لم تستلم أي طلبات حتى الآن</div>
      </div>
     </div>
     </div><!-- Driver Dashboard -->
@@ -1634,6 +1643,18 @@
         loadActiveOrdersForDriver();
         setInterval(loadActiveOrdersForDriver, 5000);
       }
+
+      // Start polling for merchants to load incoming orders every 5 seconds
+      if (currentUser && currentUser.role === 'merchant') {
+        loadIncomingOrdersForMerchant();
+        setInterval(loadIncomingOrdersForMerchant, 5000);
+      }
+
+      // Start polling for agents to track their orders every 5 seconds
+      if (currentUser && currentUser.role === 'agent') {
+        loadAgentOrdersForTracking();
+        setInterval(loadAgentOrdersForTracking, 5000);
+      }
     }
 
     function togglePassword(inputId, iconElement) {
@@ -1712,9 +1733,13 @@
           if (user.role === 'agent') {
             document.getElementById('agentDashboard').classList.remove('hidden');
             document.getElementById('agentRating').textContent = user.rating ? user.rating.toFixed(1) : '5.0';
+            // Start polling for agent's orders
+            loadAgentOrdersForTracking();
           } else if (user.role === 'merchant') {
             document.getElementById('merchantDashboard').classList.remove('hidden');
             document.getElementById('merchantRating').textContent = user.rating ? user.rating.toFixed(1) : '5.0';
+            // Start polling for merchant orders
+            loadIncomingOrdersForMerchant();
           } else if (user.role === 'driver') {
             document.getElementById('driverDashboard').classList.remove('hidden');
             document.getElementById('driverRating').textContent = user.rating ? user.rating.toFixed(1) : '5.0';
@@ -2418,6 +2443,143 @@
       } catch (error) {
         console.error('Update order status error:', error);
         alert('❌ خطأ في الاتصال. حاول مرة أخرى');
+      }
+    }
+
+    // ========================
+    // MERCHANT ORDER FUNCTIONS
+    // ========================
+
+    async function loadIncomingOrdersForMerchant() {
+      if (!currentUser || currentUser.role !== 'merchant') return;
+
+      try {
+        const resp = await fetch('/.netlify/functions/getOrdersForMerchant?merchant_id=' + currentUser.user_id);
+        const orders = await resp.json();
+
+        if (Array.isArray(orders) && orders.length > 0) {
+          const displayOrders = orders.map(o => ({
+            order_id: o.order_id,
+            status: o.status === 'accepted' ? 'جاري الاستلام' : 'جاري التسليم',
+            from: o.pickup_location,
+            to: o.drop_location,
+            total: o.price + ' ريال',
+            customer: o.goods_type,
+            date: new Date(o.created_at).toLocaleDateString('ar-YE'),
+            actions: [
+              {
+                label: 'تأكيد الاستلام',
+                onClick: () => handleConfirmReceipt(o.order_id)
+              }
+            ]
+          }));
+
+          window.renderOrders('merchantIncomingOrders', displayOrders);
+
+          // Play notification
+          try {
+            const audio = new Audio('notification.mp3');
+            audio.volume = 0.5;
+            audio.play().catch(() => {});
+          } catch (e) {}
+        } else {
+          const container = document.getElementById('merchantIncomingOrders');
+          if (container) {
+            container.innerHTML = '<div class="empty-note">لا توجد طلبات قادمة حالياً</div>';
+          }
+        }
+      } catch (e) {
+        console.log('Load incoming orders failed:', e);
+      }
+    }
+
+    async function handleConfirmReceipt(orderId) {
+      if (!currentUser || currentUser.role !== 'merchant') {
+        alert('❌ فقط التجار يمكنهم تأكيد استلام الطلبات');
+        return;
+      }
+
+      const confirmed = confirm('هل تأكد من استلام هذا الطلب؟ سيتم تحديث حالة الطلب إلى "مستلم"');
+      if (!confirmed) return;
+
+      try {
+        const resp = await fetch('/.netlify/functions/updateOrderStatus', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            order_id: orderId,
+            new_status: 'confirmed'
+          })
+        });
+
+        const result = await resp.json();
+
+        if (result.isOk) {
+          alert('✅ تم تأكيد استلام الطلب بنجاح! شكراً لك.');
+          // Reload
+          await loadIncomingOrdersForMerchant();
+        } else {
+          alert('❌ فشل التأكيد: ' + (result.error?.message || 'خطأ غير معروف'));
+        }
+      } catch (error) {
+        console.error('Confirm receipt error:', error);
+        alert('❌ خطأ في الاتصال. حاول مرة أخرى');
+      }
+    }
+
+    // ========================
+    // AGENT TRACKING FUNCTIONS
+    // ========================
+
+    async function loadAgentOrdersForTracking() {
+      if (!currentUser || currentUser.role !== 'agent') return;
+
+      try {
+        const resp = await fetch('/.netlify/functions/getOrdersByAgentForTracking?agent_id=' + currentUser.user_id);
+        const orders = await resp.json();
+
+        if (Array.isArray(orders) && orders.length > 0) {
+          const displayOrders = orders.map(o => {
+            let statusText = '';
+            let statusEmoji = '';
+            
+            if (o.status === 'pending') {
+              statusText = 'في انتظار السائق';
+              statusEmoji = '⏳';
+            } else if (o.status === 'accepted') {
+              statusText = 'مقبول من السائق';
+              statusEmoji = '✅';
+            } else if (o.status === 'picked') {
+              statusText = 'تم الاستلام';
+              statusEmoji = '📦';
+            } else if (o.status === 'delivered') {
+              statusText = 'تم التسليم';
+              statusEmoji = '🚚';
+            } else if (o.status === 'confirmed') {
+              statusText = 'مؤكد من المستقبل';
+              statusEmoji = '👍';
+            }
+
+            return {
+              order_id: o.order_id,
+              status: `${statusEmoji} ${statusText}`,
+              from: o.pickup_location,
+              to: o.drop_location,
+              total: o.price + ' ريال',
+              customer: o.goods_type,
+              date: new Date(o.created_at).toLocaleDateString('ar-YE')
+            };
+          });
+
+          window.renderOrders('agentOrdersList', displayOrders);
+        } else {
+          const container = document.getElementById('agentOrdersList');
+          if (container) {
+            container.innerHTML = '<div class="empty-note">لم تقم بإنشاء أي طلبات حتى الآن</div>';
+          }
+        }
+      } catch (e) {
+        console.log('Load agent orders failed:', e);
       }
     }
 
