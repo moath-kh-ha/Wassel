@@ -1,0 +1,2360 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>واصل - تسجيل الدخول</title>
+  <script src="./_sdk/data_sdk.js"></script>
+  <script src="./_sdk/element_sdk.js"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%);
+      color: #2d3748;
+      height: 100%;
+      width: 100%;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+    }
+
+    .app-container {
+      width: 100%;
+      min-height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    @media (max-width: 480px) {
+      .app-container {
+        padding: 1rem 0.5rem;
+      }
+    }
+
+    .auth-card {
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(20px);
+      border-radius: 28px;
+      box-shadow: 0 25px 80px rgba(0, 0, 0, 0.35), 0 15px 40px rgba(126, 34, 206, 0.25);
+      padding: 3rem 2.5rem;
+      max-width: 520px;
+      width: 100%;
+      animation: fadeIn 0.5s ease-out;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .auth-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%);
+    }
+
+    .auth-card::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(126, 34, 206, 0.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .logo-section {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .logo {
+      font-size: 3.5rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.75rem;
+      display: inline-block;
+      letter-spacing: -2px;
+      text-shadow: 0 4px 20px rgba(126, 34, 206, 0.2);
+      position: relative;
+      z-index: 1;
+    }
+
+    .logo-subtitle {
+      color: #4a5568;
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #1a202c;
+      margin-bottom: 2.5rem;
+      font-size: 2rem;
+      font-weight: 800;
+      position: relative;
+      z-index: 1;
+    }
+
+    .form-group {
+      margin-bottom: 1.75rem;
+      position: relative;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #2d3748;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 1.25rem 1.5rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 14px;
+      font-size: 1.05rem;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f8fafc;
+      position: relative;
+      z-index: 1;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: #2a5298;
+      box-shadow: 0 0 0 4px rgba(42, 82, 152, 0.15), 0 8px 20px rgba(126, 34, 206, 0.1);
+      background: white;
+      transform: translateY(-2px);
+    }
+
+    input:hover, select:hover {
+      border-color: #cbd5e0;
+      background: white;
+    }
+
+    .password-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .password-wrapper input {
+      padding-left: 3.5rem;
+      width: 100%;
+    }
+
+    .password-toggle {
+      position: absolute;
+      left: 1rem;
+      cursor: pointer;
+      font-size: 1.5rem;
+      color: #667eea;
+      transition: all 0.3s ease;
+      user-select: none;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      background: rgba(102, 126, 234, 0.1);
+      z-index: 10;
+    }
+
+    .password-toggle:hover {
+      color: #764ba2;
+      background: rgba(102, 126, 234, 0.2);
+      transform: scale(1.15);
+    }
+
+    .password-toggle:active {
+      transform: scale(0.95);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 1.125rem;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 1rem;
+      letter-spacing: 0.3px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%);
+      color: white;
+      box-shadow: 0 6px 20px rgba(42, 82, 152, 0.4), 0 2px 8px rgba(126, 34, 206, 0.2);
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+
+    .btn-primary:hover:not(:disabled)::before {
+      left: 100%;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 35px rgba(42, 82, 152, 0.5), 0 4px 12px rgba(126, 34, 206, 0.3);
+    }
+
+    .btn-primary:active:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 15px rgba(42, 82, 152, 0.4);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-secondary {
+      background: white;
+      color: #667eea;
+      border: 2px solid #667eea;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+    }
+
+    .btn-secondary:hover {
+      background: #667eea;
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .toggle-link {
+      text-align: center;
+      margin-top: 2rem;
+      color: #718096;
+      font-size: 0.95rem;
+    }
+
+    .toggle-link a {
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-block;
+    }
+
+    .toggle-link a:hover {
+      color: #764ba2;
+      transform: translateX(-3px);
+    }
+
+    .admin-link {
+      text-align: center;
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 2px solid #f1f3f5;
+    }
+
+    .admin-link a {
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+    }
+
+    .admin-link a:hover {
+      background: #f7f9fc;
+      color: #764ba2;
+      transform: scale(1.05);
+    }
+
+    .role-selector {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .role-option {
+      padding: 1.75rem 1.25rem;
+      border: 3px solid #e2e8f0;
+      border-radius: 18px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .role-option::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, rgba(30, 60, 114, 0.05) 0%, rgba(126, 34, 206, 0.05) 100%);
+      opacity: 0;
+      transition: opacity 0.4s;
+    }
+
+    .role-option:hover::before {
+      opacity: 1;
+    }
+
+    .role-option:hover {
+      border-color: #2a5298;
+      background: white;
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 15px 35px rgba(42, 82, 152, 0.3), 0 5px 15px rgba(126, 34, 206, 0.2);
+    }
+
+    .role-option.selected {
+      border-color: #7e22ce;
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%);
+      color: white;
+      transform: translateY(-5px) scale(1.1);
+      box-shadow: 0 15px 40px rgba(42, 82, 152, 0.5), 0 8px 20px rgba(126, 34, 206, 0.4);
+    }
+
+    .role-option.selected::before {
+      opacity: 0;
+    }
+
+    .role-icon {
+      font-size: 2.25rem;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .role-label {
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .message {
+      padding: 1.125rem 1.25rem;
+      border-radius: 12px;
+      margin-bottom: 1.75rem;
+      text-align: center;
+      font-weight: 600;
+      font-size: 0.95rem;
+      animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .message-success {
+      background: linear-gradient(135deg, #d4f4dd 0%, #c6f6d5 100%);
+      color: #1e4620;
+      border: 2px solid #9ae6b4;
+      box-shadow: 0 4px 12px rgba(154, 230, 180, 0.3);
+    }
+
+    .message-error {
+      background: linear-gradient(135deg, #fee 0%, #fed7d7 100%);
+      color: #742a2a;
+      border: 2px solid #fc8181;
+      box-shadow: 0 4px 12px rgba(252, 129, 129, 0.3);
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeIn {
+      from { 
+        opacity: 0;
+      }
+      to { 
+        opacity: 1;
+      }
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.05);
+      }
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .logo-section {
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    .role-icon {
+      transition: transform 0.3s ease;
+    }
+
+    .role-option:hover .role-icon {
+      transform: scale(1.2) rotate(5deg);
+    }
+
+    .role-option.selected .role-icon {
+      animation: pulse 2s infinite;
+    }
+
+    .dashboard {
+      background: white;
+      border-radius: 24px;
+      padding: 3rem 2.5rem;
+      max-width: 1200px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 70px rgba(102, 126, 234, 0.25), 0 10px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .dashboard h2 {
+      color: #2d3748;
+      margin-bottom: 1rem;
+    }
+
+    .user-info {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 1.5rem;
+      border-radius: 15px;
+      margin-bottom: 1.5rem;
+      font-size: 1.2rem;
+    }
+
+    .debug-info {
+      background: #f7fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 1rem;
+      margin-top: 1rem;
+      text-align: right;
+      font-size: 0.85rem;
+      color: #4a5568;
+    }
+
+    /* Admin Dashboard Styles */
+    #adminDashboard {
+      max-width: 1400px;
+      padding: 3rem 2.5rem;
+    }
+
+    .admin-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .admin-header h1 {
+      font-size: 3rem;
+      color: #1a202c;
+      margin-bottom: 0.75rem;
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 900;
+      letter-spacing: -1px;
+      text-shadow: 0 4px 20px rgba(126, 34, 206, 0.15);
+    }
+
+    .admin-subtitle {
+      color: #718096;
+      font-size: 1.1rem;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%);
+      color: white;
+      padding: 2rem 1.75rem;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(42, 82, 152, 0.4), 0 4px 12px rgba(126, 34, 206, 0.2);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -50%;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+      transition: all 0.5s;
+    }
+
+    .stat-card:hover::before {
+      top: -25%;
+      right: -25%;
+      width: 150%;
+      height: 150%;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-8px) scale(1.03);
+      box-shadow: 0 20px 50px rgba(42, 82, 152, 0.5), 0 8px 20px rgba(126, 34, 206, 0.3);
+    }
+
+    .stat-icon {
+      font-size: 2.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      font-size: 1rem;
+      opacity: 0.95;
+      font-weight: 600;
+    }
+
+    .filter-section {
+      background: #f8fafc;
+      padding: 1.75rem;
+      border-radius: 16px;
+      margin-bottom: 2rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      border: 2px solid #e2e8f0;
+    }
+
+    .filter-group, .search-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .filter-group label, .search-group label {
+      margin-bottom: 0.5rem;
+      color: #2d3748;
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .users-table-container {
+      background: white;
+      border-radius: 16px;
+      overflow-x: auto;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+      margin-bottom: 2rem;
+    }
+
+    .users-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .users-table thead {
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(42, 82, 152, 0.3);
+    }
+
+    .users-table th {
+      padding: 1.5rem 1.25rem;
+      text-align: right;
+      font-weight: 800;
+      font-size: 1rem;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+    }
+
+    .users-table td {
+      padding: 1.5rem 1.25rem;
+      text-align: right;
+      border-bottom: 2px solid #f1f5f9;
+      color: #2d3748;
+      font-weight: 500;
+    }
+
+    .users-table tbody tr {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border-right: 4px solid transparent;
+    }
+
+    .users-table tbody tr:hover {
+      background: linear-gradient(90deg, #f8fafc 0%, #ffffff 100%);
+      border-right-color: #7e22ce;
+      box-shadow: 0 4px 15px rgba(42, 82, 152, 0.1);
+      transform: translateX(-5px);
+    }
+
+    .role-badge {
+      display: inline-block;
+      padding: 0.5rem 1.1rem;
+      border-radius: 25px;
+      font-size: 0.85rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+      transition: all 0.3s ease;
+    }
+
+    .role-badge:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.25);
+    }
+
+    .role-agent {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      color: white;
+      border: 2px solid rgba(59, 130, 246, 0.3);
+    }
+
+    .role-merchant {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      border: 2px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .role-driver {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: white;
+      border: 2px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 0.5rem 1.1rem;
+      border-radius: 25px;
+      font-size: 0.85rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+      transition: all 0.3s ease;
+    }
+
+    .status-badge:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.25);
+    }
+
+    .status-active {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      border: 2px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .status-blocked {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      color: white;
+      border: 2px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .action-btns {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+
+    .btn-action {
+      padding: 0.65rem 1.25rem;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      letter-spacing: 0.3px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-action::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      transform: translate(-50%, -50%);
+      transition: width 0.5s, height 0.5s;
+    }
+
+    .btn-action:hover::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    .btn-block {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-block:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(239, 68, 68, 0.5);
+    }
+
+    .btn-unblock {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-unblock:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(16, 185, 129, 0.5);
+    }
+
+    .btn-delete {
+      background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(100, 116, 139, 0.3);
+    }
+
+    .btn-delete:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(100, 116, 139, 0.5);
+    }
+
+    .btn-edit {
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      color: white;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-edit:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(59, 130, 246, 0.5);
+    }
+
+    .admin-actions {
+      text-align: center;
+      padding-top: 1.5rem;
+      border-top: 2px solid #e2e8f0;
+    }
+
+    .rating-stars {
+      color: #fbbf24;
+      font-size: 1rem;
+    }
+
+    .no-users {
+      text-align: center;
+      padding: 3rem;
+      color: #718096;
+      font-size: 1.1rem;
+    }
+
+    /* Role-Specific Dashboard Styles */
+    .role-dashboard {
+      margin-top: 2rem;
+    }
+
+    .dashboard-section {
+      margin-top: 2rem;
+      background: #f8fafc;
+      padding: 2rem;
+      border-radius: 16px;
+      border: 2px solid #e2e8f0;
+    }
+
+    .dashboard-section h3 {
+      color: #2d3748;
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      font-weight: 800;
+    }
+
+    .orders-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .order-card {
+      background: white;
+      padding: 1.75rem;
+      border-radius: 14px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      border: 2px solid #e2e8f0;
+      transition: all 0.3s ease;
+    }
+
+    .order-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(42, 82, 152, 0.15);
+      border-color: #7e22ce;
+    }
+
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid #f1f5f9;
+    }
+
+    .order-id {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #2d3748;
+    }
+
+    .order-details {
+      color: #4a5568;
+      line-height: 1.8;
+    }
+
+    .order-details p {
+      margin: 0.5rem 0;
+      font-weight: 600;
+    }
+
+    .order-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.25rem;
+      padding-top: 1.25rem;
+      border-top: 2px solid #f1f5f9;
+    }
+
+    .order-actions .btn-action {
+      flex: 1;
+      padding: 0.875rem 1.5rem;
+      font-size: 0.95rem;
+    }
+
+    .availability-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      padding: 1.5rem;
+      background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+      border-radius: 16px;
+      margin-top: 2rem;
+      border: 2px solid #e2e8f0;
+    }
+
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 34px;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #cbd5e0;
+      transition: 0.4s;
+      border-radius: 34px;
+    }
+
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 26px;
+      width: 26px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: 0.4s;
+      border-radius: 50%;
+    }
+
+    .toggle-switch input:checked + .toggle-slider {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+
+    .toggle-switch input:checked + .toggle-slider:before {
+      transform: translateX(26px);
+    }
+
+    .toggle-label {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #2d3748;
+    }
+
+    /* Modal Styles */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      animation: fadeIn 0.3s ease;
+      padding: 1rem;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 24px;
+      padding: 2.5rem;
+      max-width: 650px;
+      width: 100%;
+      max-height: 90%;
+      overflow-y: auto;
+      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.4), 0 15px 40px rgba(126, 34, 206, 0.3);
+      animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 2px solid rgba(255, 255, 255, 0.5);
+      position: relative;
+    }
+
+    .modal-content::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: linear-gradient(90deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%);
+      border-radius: 24px 24px 0 0;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      font-size: 1.75rem;
+    }
+
+    .close-modal {
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #a0aec0;
+      transition: all 0.3s;
+      padding: 0.5rem;
+      border-radius: 8px;
+    }
+
+    .close-modal:hover {
+      color: #667eea;
+      background: #f7fafc;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .modal-actions .btn {
+      flex: 1;
+      margin-top: 0;
+    }
+
+    .export-options {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .export-options .btn {
+      margin-top: 0;
+    }
+
+    .admin-toolbar {
+      display: flex;
+      gap: 1.25rem;
+      margin-bottom: 2.5rem;
+      flex-wrap: wrap;
+      padding: 1.5rem;
+      background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+      border-radius: 20px;
+      box-shadow: 0 4px 15px rgba(42, 82, 152, 0.1);
+      border: 2px solid #e2e8f0;
+    }
+
+    .admin-toolbar .btn {
+      flex: 1;
+      min-width: 200px;
+      margin-top: 0;
+      font-size: 0.95rem;
+      padding: 1rem 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .auth-card {
+        padding: 2rem 1.5rem;
+        margin: 0.5rem;
+      }
+
+      .logo {
+        font-size: 2.5rem;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+      }
+
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+
+      input, select {
+        padding: 1rem 1.125rem;
+        font-size: 1rem;
+      }
+
+      .role-selector {
+        gap: 1rem;
+      }
+
+      .role-option {
+        padding: 1.25rem 0.75rem;
+      }
+
+      .dashboard {
+        padding: 2rem 1.5rem;
+      }
+
+      #adminDashboard {
+        padding: 2rem 1.5rem;
+      }
+
+      .admin-header h1 {
+        font-size: 1.75rem;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+      }
+
+      .filter-section {
+        grid-template-columns: 1fr;
+        padding: 1.5rem;
+        gap: 1.25rem;
+      }
+
+      .users-table {
+        font-size: 0.85rem;
+      }
+
+      .users-table th,
+      .users-table td {
+        padding: 0.875rem 0.625rem;
+      }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body>
+  <main class="app-container"><!-- Login Form -->
+   <div id="loginForm" class="auth-card">
+    <div class="logo-section">
+     <div class="logo">
+      واصل
+     </div>
+     <div class="logo-subtitle">
+      منصة ربط النقل الذكية
+     </div>
+    </div>
+    <h2>تسجيل الدخول</h2>
+    <div id="loginMessage"></div>
+    <form onsubmit="return handleLogin(event)">
+     <div class="form-group"><label for="loginPhone">📱 رقم الهاتف</label> <input type="tel" id="loginPhone" required placeholder="مثال: 777123456">
+     </div>
+     <div class="form-group"><label for="loginPassword">🔒 كلمة المرور</label>
+      <div class="password-wrapper"><input type="password" id="loginPassword" required placeholder="أدخل كلمة المرور"> <span class="password-toggle" onclick="togglePassword('loginPassword', this)">🔒</span>
+      </div>
+     </div><button type="submit" class="btn btn-primary" id="loginBtn"> <span id="loginBtnText">تسجيل الدخول</span> </button>
+    </form>
+    <div class="debug-info" id="debugInfo">
+     عدد المستخدمين: <span id="userCount">0</span>
+    </div>
+    <div class="toggle-link">
+     ليس لديك حساب؟ <a onclick="showRegisterForm()">إنشاء حساب جديد</a>
+    </div>
+    <div class="admin-link"><a onclick="showAdminLoginForm()">🔐 تسجيل دخول المسؤول</a>
+    </div>
+   </div><!-- Admin Login Form -->
+   <div id="adminLoginForm" class="auth-card hidden">
+    <div class="logo-section">
+     <div class="logo">
+      🔐
+     </div>
+     <div class="logo-subtitle">
+      لوحة تحكم المسؤول
+     </div>
+    </div>
+    <h2>تسجيل دخول المسؤول</h2>
+    <div id="adminLoginMessage"></div>
+    <form onsubmit="return handleAdminLogin(event)">
+     <div class="form-group"><label for="adminUsername">👤 اسم المستخدم</label> <input type="text" id="adminUsername" required placeholder="711778058">
+     </div>
+     <div class="form-group"><label for="adminPassword">🔑 كلمة المرور</label>
+      <div class="password-wrapper"><input type="password" id="adminPassword" required placeholder="KHSHiph32001"> <span class="password-toggle" onclick="togglePassword('adminPassword', this)">🔒</span>
+      </div>
+     </div><button type="submit" class="btn btn-primary" id="adminLoginBtn"> <span id="adminLoginBtnText">دخول</span> </button>
+    </form>
+    <div class="toggle-link"><a onclick="showLoginForm()">العودة لتسجيل الدخول العادي</a>
+    </div>
+   </div><!-- Register Form -->
+   <div id="registerForm" class="auth-card hidden">
+    <div class="logo-section">
+     <div class="logo">
+      واصل
+     </div>
+     <div class="logo-subtitle">
+      منصة ربط النقل الذكية
+     </div>
+    </div>
+    <h2>إنشاء حساب جديد</h2>
+    <div id="registerMessage"></div>
+    <form onsubmit="return handleRegister(event)">
+     <div class="form-group"><label>👥 نوع الحساب</label>
+      <div class="role-selector">
+       <div class="role-option" onclick="selectRole('agent')" data-role="agent">
+        <div class="role-icon">
+         📦
+        </div>
+        <div class="role-label">
+         وكيل
+        </div>
+       </div>
+       <div class="role-option" onclick="selectRole('merchant')" data-role="merchant">
+        <div class="role-icon">
+         🏪
+        </div>
+        <div class="role-label">
+         تاجر
+        </div>
+       </div>
+       <div class="role-option" onclick="selectRole('driver')" data-role="driver">
+        <div class="role-icon">
+         🚚
+        </div>
+        <div class="role-label">
+         سائق
+        </div>
+       </div>
+      </div><input type="hidden" id="registerRole" required>
+     </div>
+     <div class="form-group"><label for="registerName">👤 الاسم</label> <input type="text" id="registerName" required placeholder="أدخل اسمك">
+     </div>
+     <div class="form-group"><label for="registerPhone">📱 رقم الهاتف</label> <input type="tel" id="registerPhone" required placeholder="777123456">
+     </div>
+     <div class="form-group"><label for="registerLocation">📍 المدينة</label> <select id="registerLocation" required> <option value="">اختر المدينة</option> <option value="صنعاء">صنعاء</option> <option value="عدن">عدن</option> <option value="تعز">تعز</option> <option value="الحديدة">الحديدة</option> </select>
+     </div>
+     <div class="form-group"><label for="registerPassword">🔒 كلمة المرور (6 أحرف كحد أدنى)</label>
+      <div class="password-wrapper"><input type="password" id="registerPassword" required placeholder="أدخل كلمة المرور" minlength="6"> <span class="password-toggle" onclick="togglePassword('registerPassword', this)">🔒</span>
+      </div>
+     </div>
+     <div class="form-group"><label for="registerConfirmPassword">✅ تأكيد كلمة المرور</label>
+      <div class="password-wrapper"><input type="password" id="registerConfirmPassword" required placeholder="أعد كتابة كلمة المرور" minlength="6"> <span class="password-toggle" onclick="togglePassword('registerConfirmPassword', this)">🔒</span>
+      </div>
+     </div><button type="submit" class="btn btn-primary" id="registerBtn"> <span id="registerBtnText">إنشاء الحساب</span> </button>
+    </form>
+    <div class="toggle-link">
+     لديك حساب بالفعل؟ <a onclick="showLoginForm()">تسجيل الدخول</a>
+    </div>
+   </div><!-- Dashboard -->
+   <div id="dashboard" class="dashboard hidden">
+    <div class="user-info">
+     <h2 id="dashboardTitle">مرحباً في لوحة التحكم</h2>
+     <p id="userInfoText">تم تسجيل الدخول بنجاح!</p>
+    </div><!-- Agent Dashboard -->
+    <div id="agentDashboard" class="role-dashboard hidden">
+     <div class="stats-grid">
+      <div class="stat-card">
+       <div class="stat-icon">
+        📦
+       </div>
+       <div class="stat-value">
+        24
+       </div>
+       <div class="stat-label">
+        الطلبات النشطة
+       </div>
+      </div>
+      <div class="stat-card">
+       <div class="stat-icon">
+        ✅
+       </div>
+       <div class="stat-value">
+        156
+       </div>
+       <div class="stat-label">
+        الطلبات المكتملة
+       </div>
+      </div>
+      <div class="stat-card">
+       <div class="stat-icon">
+        💰
+       </div>
+       <div class="stat-value">
+        45,000
+       </div>
+       <div class="stat-label">
+        الأرباح (ريال)
+       </div>
+      </div>
+      <div class="stat-card">
+       <div class="stat-icon">
+        ⭐
+       </div>
+       <div class="stat-value" id="agentRating">
+        5.0
+       </div>
+       <div class="stat-label">
+        التقييم
+       </div>
+      </div>
+     </div>
+     <div class="dashboard-section">
+      <h3>📋 الطلبات الأخيرة</h3>
+      <div class="orders-list">
+       <div class="order-card">
+        <div class="order-header"><span class="order-id">#12456</span> <span class="status-badge status-active">قيد التوصيل</span>
+        </div>
+        <div class="order-details">
+         <p>📍 من: صنعاء - إلى: عدن</p>
+         <p>💰 المبلغ: 1,500 ريال</p>
+         <p>📅 التاريخ: اليوم</p>
+        </div>
+       </div>
+       <div class="order-card">
+        <div class="order-header"><span class="order-id">#12455</span> <span class="status-badge status-active">جاهز للشحن</span>
+        </div>
+        <div class="order-details">
+         <p>📍 من: تعز - إلى: الحديدة</p>
+         <p>💰 المبلغ: 2,000 ريال</p>
+         <p>📅 التاريخ: أمس</p>
+        </div>
+       </div>
+      </div>
+     </div>
+    </div><!-- Merchant Dashboard -->
+    <div id="merchantDashboard" class="role-dashboard hidden">
+     <div class="stats-grid">
+      <div class="stat-card">
+       <div class="stat-icon">
+        📦
+       </div>
+       <div class="stat-value">
+        89
+       </div>
+       <div class="stat-label">
+        المنتجات
+       </div>
+      </div>
+      <div class="stat-card">
+       <div class="stat-icon">
+        📦
+       </div>
+       <div class="stat-value">
+        342
+       </div>
+       <div class="stat-label">
+        الطلبات الكلية
+       </div>
+      </div>
+      <div class="stat-card">
+       <div class="stat-icon">
+        💵
+       </div>
+       <div class="stat-value">
+        125,000
+       </div>
+       <div class="stat-label">
+        المبيعات (ريال)
+       </div>
+      </div>
+      <div class="stat-card">
+       <div class="stat-icon">
+        ⭐
+       </div>
+       <div class="stat-value" id="merchantRating">
+        5.0
+       </div>
+       <div class="stat-label">
+        التقييم
+       </div>
+      </div>
+     </div>
+     <div class="dashboard-section">
+      <h3>📦 الطلبات الجديدة</h3>
+      <div class="orders-list">
+       <div class="order-card">
+        <div class="order-header"><span class="order-id">#ORD-789</span> <span class="status-badge status-active">طلب جديد</span>
+        </div>
+        <div class="order-details">
+         <p>👤 العميل: أحمد محمد</p>
+         <p>📦 المنتجات: 5 قطع</p>
+         <p>💰 الإجمالي: 8,500 ريال</p>
+         <p>📅 التاريخ: منذ ساعتين</p>
+        </div>
+        <div class="order-actions"><button class="btn-action btn-primary">قبول</button> <button class="btn-action btn-secondary">رفض</button>
+        </div>
+       </div>
+       <div class="order-card">
+        <div class="order-header"><span class="order-id">#ORD-788</span> <span class="status-badge status-active">قيد التجهيز</span>
+        </div>
+        <div class="order-details">
+         <p>👤 العميل: فاطمة علي</p>
+         <p>📦 المنتجات: 3 قطع</p>
+         <p>💰 الإجمالي: 5,200 ريال</p>
+         <p>📅 التاريخ: منذ 4 ساعات</p>
+        </div>
+        <div class="order-actions"><button class="btn-action btn-primary">جاهز للشحن</button>
+        </div>
+       </div>
+      </div>
+     </div>
+    </div><!-- Driver Dashboard -->
+    <div id="driverDashboard" class="role-dashboard hidden">
+     <div class="stats-grid">
+      <div class="stat-card">
+       <div class="stat-icon">
+        🚚
+       </div>
+       <div class="stat-value">
+        12
+       </div>
+       <div class="stat-label">
+        الرحلات اليوم
+       </div>
+      </div>
+      <div class="stat-card">
+       <div class="stat-icon">
+        ✅
+       </div>
+       <div class="stat-value">
+        487
+       </div>
+       <div class="stat-label">
+        الرحلات الكلية
+       </div>
+      </div>
+      <div class="stat-card">
+       <div class="stat-icon">
+        💰
+       </div>
+       <div class="stat-value">
+        78,500
+       </div>
+       <div class="stat-label">
+        الأرباح (ريال)
+       </div>
+      </div>
+      <div class="stat-card">
+       <div class="stat-icon">
+        ⭐
+       </div>
+       <div class="stat-value" id="driverRating">
+        5.0
+       </div>
+       <div class="stat-label">
+        التقييم
+       </div>
+      </div>
+     </div>
+     <div class="availability-toggle"><label class="toggle-switch"> <input type="checkbox" id="driverAvailable" checked onchange="toggleAvailability()"> <span class="toggle-slider"></span> </label> <span class="toggle-label">متاح للعمل الآن</span>
+     </div>
+     <div class="dashboard-section">
+      <h3>🚗 الطلبات المتاحة</h3>
+      <div class="orders-list">
+       <div class="order-card">
+        <div class="order-header"><span class="order-id">#TRIP-456</span> <span class="status-badge status-active">متاح</span>
+        </div>
+        <div class="order-details">
+         <p>📍 المسار: صنعاء - عدن</p>
+         <p>📏 المسافة: 365 كم</p>
+         <p>💰 الأجرة: 15,000 ريال</p>
+         <p>📦 الحمولة: متوسطة</p>
+         <p>📅 موعد الاستلام: غداً 8:00 ص</p>
+        </div>
+        <div class="order-actions"><button class="btn-action btn-primary">قبول الطلب</button>
+        </div>
+       </div>
+       <div class="order-card">
+        <div class="order-header"><span class="order-id">#TRIP-455</span> <span class="status-badge status-active">متاح</span>
+        </div>
+        <div class="order-details">
+         <p>📍 المسار: تعز - إب</p>
+         <p>📏 المسافة: 85 كم</p>
+         <p>💰 الأجرة: 5,500 ريال</p>
+         <p>📦 الحمولة: خفيفة</p>
+         <p>📅 موعد الاستلام: اليوم 2:00 م</p>
+        </div>
+        <div class="order-actions"><button class="btn-action btn-primary">قبول الطلب</button>
+        </div>
+       </div>
+      </div>
+     </div>
+    </div><button class="btn btn-secondary" onclick="handleLogout()" style="margin-top: 2rem;">تسجيل الخروج</button>
+   </div><!-- Admin Dashboard -->
+   <div id="adminDashboard" class="dashboard hidden">
+    <div class="admin-header">
+     <h1>🔐 لوحة تحكم المسؤول</h1>
+     <p class="admin-subtitle">إدارة المستخدمين والنظام</p>
+    </div>
+    <div class="admin-toolbar"><button class="btn btn-primary" onclick="openExportModal()"> 📊 تصدير البيانات </button> <button class="btn btn-primary" onclick="sendBulkNotification()"> 📢 إرسال إشعار جماعي </button> <button class="btn btn-secondary" onclick="refreshData()"> 🔄 تحديث البيانات </button>
+    </div>
+    <div class="stats-grid">
+     <div class="stat-card">
+      <div class="stat-icon">
+       👥
+      </div>
+      <div class="stat-value" id="totalUsers">
+       0
+      </div>
+      <div class="stat-label">
+       إجمالي المستخدمين
+      </div>
+     </div>
+     <div class="stat-card">
+      <div class="stat-icon">
+       📦
+      </div>
+      <div class="stat-value" id="totalAgents">
+       0
+      </div>
+      <div class="stat-label">
+       الوكلاء
+      </div>
+     </div>
+     <div class="stat-card">
+      <div class="stat-icon">
+       🏪
+      </div>
+      <div class="stat-value" id="totalMerchants">
+       0
+      </div>
+      <div class="stat-label">
+       التجار
+      </div>
+     </div>
+     <div class="stat-card">
+      <div class="stat-icon">
+       🚚
+      </div>
+      <div class="stat-value" id="totalDrivers">
+       0
+      </div>
+      <div class="stat-label">
+       السائقين
+      </div>
+     </div>
+    </div>
+    <div class="filter-section">
+     <div class="filter-group"><label for="filterRole">🔍 تصفية حسب النوع:</label> <select id="filterRole" onchange="filterUsers()"> <option value="all">الكل</option> <option value="agent">وكلاء</option> <option value="merchant">تجار</option> <option value="driver">سائقين</option> </select>
+     </div>
+     <div class="filter-group"><label for="filterStatus">🔍 تصفية حسب الحالة:</label> <select id="filterStatus" onchange="filterUsers()"> <option value="all">الكل</option> <option value="active">نشط</option> <option value="blocked">محظور</option> </select>
+     </div>
+     <div class="search-group"><label for="searchUser">🔎 بحث:</label> <input type="text" id="searchUser" placeholder="ابحث بالاسم أو رقم الهاتف..." oninput="filterUsers()">
+     </div>
+    </div>
+    <div class="users-table-container">
+     <table class="users-table">
+      <thead>
+       <tr>
+        <th>الاسم</th>
+        <th>رقم الهاتف</th>
+        <th>النوع</th>
+        <th>المدينة</th>
+        <th>التقييم</th>
+        <th>تاريخ التسجيل</th>
+        <th>الحالة</th>
+        <th>الإجراءات</th>
+       </tr>
+      </thead>
+      <tbody id="usersTableBody"><!-- Users will be populated here -->
+      </tbody>
+     </table>
+    </div>
+    <div class="admin-actions"><button class="btn btn-secondary" onclick="handleLogout()">تسجيل الخروج</button>
+    </div>
+   </div><!-- Edit User Modal -->
+   <div id="editUserModal" class="modal hidden">
+    <div class="modal-content">
+     <div class="modal-header">
+      <h2>✏️ تعديل بيانات المستخدم</h2><span class="close-modal" onclick="closeEditModal()">✖️</span>
+     </div>
+     <div id="editUserMessage"></div>
+     <form onsubmit="return handleEditUser(event)">
+      <div class="form-group"><label for="editName">الاسم</label> <input type="text" id="editName" required>
+      </div>
+      <div class="form-group"><label for="editPhone">رقم الهاتف</label> <input type="tel" id="editPhone" required>
+      </div>
+      <div class="form-group"><label for="editLocation">المدينة</label> <select id="editLocation" required> <option value="صنعاء">صنعاء</option> <option value="عدن">عدن</option> <option value="تعز">تعز</option> <option value="الحديدة">الحديدة</option> </select>
+      </div>
+      <div class="form-group"><label for="editRole">نوع الحساب</label> <select id="editRole" required> <option value="agent">وكيل</option> <option value="merchant">تاجر</option> <option value="driver">سائق</option> </select>
+      </div>
+      <div class="modal-actions"><button type="submit" class="btn btn-primary" id="editUserBtn"> <span id="editUserBtnText">حفظ التعديلات</span> </button> <button type="button" class="btn btn-secondary" onclick="closeEditModal()">إلغاء</button>
+      </div>
+     </form>
+    </div>
+   </div><!-- Export Data Section (in modal) -->
+   <div id="exportModal" class="modal hidden">
+    <div class="modal-content">
+     <div class="modal-header">
+      <h2>📊 تصدير البيانات</h2><span class="close-modal" onclick="closeExportModal()">✖️</span>
+     </div>
+     <div class="export-options"><button class="btn btn-primary" onclick="exportToCSV()"> 📄 تصدير كملف CSV </button> <button class="btn btn-primary" onclick="exportToJSON()"> 📥 تصدير كملف JSON </button> <button class="btn btn-primary" onclick="printReport()"> 🖨️ طباعة التقرير </button>
+     </div>
+     <div class="modal-actions" style="margin-top: 2rem;"><button class="btn btn-secondary" onclick="closeExportModal()">إغلاق</button>
+     </div>
+    </div>
+   </div>
+  </main>
+  <script>
+    let allUsers = [];
+    let currentUser = null;
+    let selectedRole = null;
+    let dataInitialized = false;
+
+    const defaultConfig = {
+      admin_username: "711778058",
+      admin_password: "KHSHiph32001"
+    };
+
+    const dataHandler = {
+      onDataChanged(data) {
+        allUsers = data.filter(record => record.user_id);
+        document.getElementById('userCount').textContent = allUsers.length;
+        dataInitialized = true;
+        
+        if (currentUser && currentUser.role === 'admin') {
+          updateAdminStats();
+          filterUsers();
+        }
+      }
+    };
+
+    async function initializeApp() {
+      if (window.dataSdk) {
+        const result = await window.dataSdk.init(dataHandler);
+        if (!result.isOk) {
+          console.error('فشل تهيئة Data SDK');
+        }
+      }
+
+      // Try loading users from serverless endpoint (Netlify Functions / other hosting)
+      try {
+        const resp = await fetch('/.netlify/functions/getUsers');
+        if (resp.ok) {
+          const users = await resp.json();
+          if (Array.isArray(users)) {
+            allUsers = users.map(u => ({ ...u }));
+            document.getElementById('userCount').textContent = allUsers.length;
+            dataInitialized = true;
+            if (currentUser && currentUser.role === 'admin') {
+              updateAdminStats();
+              filterUsers();
+            }
+          }
+        }
+      } catch (e) {
+        // server not available — fallback to SDK/local
+      }
+    }
+
+    function togglePassword(inputId, iconElement) {
+      const input = document.getElementById(inputId);
+      if (input.type === 'password') {
+        input.type = 'text';
+        iconElement.textContent = '👁️';
+      } else {
+        input.type = 'password';
+        iconElement.textContent = '🔒';
+      }
+    }
+
+    function selectRole(role) {
+      selectedRole = role;
+      document.getElementById('registerRole').value = role;
+      
+      document.querySelectorAll('.role-option').forEach(option => {
+        option.classList.remove('selected');
+      });
+      
+      document.querySelector(`[data-role="${role}"]`).classList.add('selected');
+    }
+
+    function showRegisterForm() {
+      document.getElementById('loginForm').classList.add('hidden');
+      document.getElementById('adminLoginForm').classList.add('hidden');
+      document.getElementById('registerForm').classList.remove('hidden');
+      document.getElementById('dashboard').classList.add('hidden');
+      clearMessages();
+    }
+
+    function showLoginForm() {
+      document.getElementById('registerForm').classList.add('hidden');
+      document.getElementById('adminLoginForm').classList.add('hidden');
+      document.getElementById('loginForm').classList.remove('hidden');
+      document.getElementById('dashboard').classList.add('hidden');
+      clearMessages();
+    }
+
+    function showAdminLoginForm() {
+      document.getElementById('loginForm').classList.add('hidden');
+      document.getElementById('registerForm').classList.add('hidden');
+      document.getElementById('adminLoginForm').classList.remove('hidden');
+      document.getElementById('dashboard').classList.add('hidden');
+      clearMessages();
+    }
+
+    function showDashboard(user) {
+      document.getElementById('loginForm').classList.add('hidden');
+      document.getElementById('registerForm').classList.add('hidden');
+      document.getElementById('adminLoginForm').classList.add('hidden');
+      document.getElementById('dashboard').classList.add('hidden');
+      document.getElementById('adminDashboard').classList.add('hidden');
+      
+      if (user && user.role === 'admin') {
+        document.getElementById('adminDashboard').classList.remove('hidden');
+        loadAdminDashboard();
+      } else if (user) {
+        document.getElementById('dashboard').classList.remove('hidden');
+        
+        document.getElementById('agentDashboard').classList.add('hidden');
+        document.getElementById('merchantDashboard').classList.add('hidden');
+        document.getElementById('driverDashboard').classList.add('hidden');
+        
+        if (user.name) {
+          const roleNames = {
+            'agent': 'وكيل',
+            'merchant': 'تاجر',
+            'driver': 'سائق'
+          };
+          
+          document.getElementById('dashboardTitle').textContent = `مرحباً ${user.name}! 👋`;
+          document.getElementById('userInfoText').textContent = `نوع الحساب: ${roleNames[user.role] || user.role}`;
+          
+          if (user.role === 'agent') {
+            document.getElementById('agentDashboard').classList.remove('hidden');
+            document.getElementById('agentRating').textContent = user.rating ? user.rating.toFixed(1) : '5.0';
+          } else if (user.role === 'merchant') {
+            document.getElementById('merchantDashboard').classList.remove('hidden');
+            document.getElementById('merchantRating').textContent = user.rating ? user.rating.toFixed(1) : '5.0';
+          } else if (user.role === 'driver') {
+            document.getElementById('driverDashboard').classList.remove('hidden');
+            document.getElementById('driverRating').textContent = user.rating ? user.rating.toFixed(1) : '5.0';
+          }
+        }
+      }
+    }
+
+    function toggleAvailability() {
+      const checkbox = document.getElementById('driverAvailable');
+      const label = checkbox.parentElement.nextElementSibling;
+      
+      if (checkbox.checked) {
+        label.textContent = 'متاح للعمل الآن';
+        showAdminMessage('✅ أنت الآن متاح لاستقبال الطلبات');
+      } else {
+        label.textContent = 'غير متاح حالياً';
+        showAdminMessage('⏸️ تم إيقاف استقبال الطلبات مؤقتاً');
+      }
+    }
+
+    function loadAdminDashboard() {
+      updateAdminStats();
+      filterUsers();
+    }
+
+    function updateAdminStats() {
+      const total = allUsers.length;
+      const agents = allUsers.filter(u => u.role === 'agent').length;
+      const merchants = allUsers.filter(u => u.role === 'merchant').length;
+      const drivers = allUsers.filter(u => u.role === 'driver').length;
+
+      document.getElementById('totalUsers').textContent = total;
+      document.getElementById('totalAgents').textContent = agents;
+      document.getElementById('totalMerchants').textContent = merchants;
+      document.getElementById('totalDrivers').textContent = drivers;
+    }
+
+    function filterUsers() {
+      const roleFilter = document.getElementById('filterRole').value;
+      const statusFilter = document.getElementById('filterStatus').value;
+      const searchQuery = document.getElementById('searchUser').value.toLowerCase().trim();
+
+      let filteredUsers = allUsers;
+
+      if (roleFilter !== 'all') {
+        filteredUsers = filteredUsers.filter(u => u.role === roleFilter);
+      }
+
+      if (statusFilter === 'active') {
+        filteredUsers = filteredUsers.filter(u => !u.is_blocked);
+      } else if (statusFilter === 'blocked') {
+        filteredUsers = filteredUsers.filter(u => u.is_blocked);
+      }
+
+      if (searchQuery) {
+        filteredUsers = filteredUsers.filter(u => 
+          u.name.toLowerCase().includes(searchQuery) || 
+          u.phone.includes(searchQuery)
+        );
+      }
+
+      renderUsersTable(filteredUsers);
+    }
+
+    function renderUsersTable(users) {
+      const tbody = document.getElementById('usersTableBody');
+      
+      if (users.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="no-users">لا يوجد مستخدمون</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = users.map(user => {
+        const roleLabel = user.role === 'agent' ? 'وكيل' : 
+                         user.role === 'merchant' ? 'تاجر' : 'سائق';
+        const roleClass = `role-${user.role}`;
+        const statusLabel = user.is_blocked ? 'محظور' : 'نشط';
+        const statusClass = user.is_blocked ? 'status-blocked' : 'status-active';
+        const date = new Date(user.created_at).toLocaleDateString('ar-YE');
+        const rating = user.rating ? user.rating.toFixed(1) : '5.0';
+
+        return `
+          <tr data-user-id="${user.__backendId}">
+            <td>${user.name}</td>
+            <td>${user.phone}</td>
+            <td><span class="role-badge ${roleClass}">${roleLabel}</span></td>
+            <td>${user.location}</td>
+            <td><span class="rating-stars">⭐ ${rating}</span></td>
+            <td>${date}</td>
+            <td><span class="status-badge ${statusClass}">${statusLabel}</span></td>
+            <td>
+              <div class="action-btns">
+                <button class="btn-action btn-edit" onclick="openEditModal('${user.__backendId}')">تعديل</button>
+                ${user.is_blocked ? 
+                  `<button class="btn-action btn-unblock" onclick="toggleBlockUser('${user.__backendId}', false)">رفع الحظر</button>` :
+                  `<button class="btn-action btn-block" onclick="toggleBlockUser('${user.__backendId}', true)">حظر</button>`
+                }
+                <button class="btn-action btn-delete" onclick="deleteUser('${user.__backendId}')">حذف</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    async function toggleBlockUser(backendId, shouldBlock) {
+      const user = allUsers.find(u => u.__backendId === backendId);
+      if (!user) return;
+
+      const actionBtn = event.target;
+      actionBtn.disabled = true;
+      const originalText = actionBtn.textContent;
+      actionBtn.innerHTML = '<span class="loading-spinner"></span>';
+
+      const updatedUser = { ...user, is_blocked: shouldBlock };
+      const result = await window.dataSdk.update(updatedUser);
+
+      actionBtn.disabled = false;
+      actionBtn.textContent = originalText;
+
+      if (!result.isOk) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'message message-error';
+        messageDiv.textContent = '❌ حدث خطأ. حاول مرة أخرى';
+        document.querySelector('.admin-header').after(messageDiv);
+        setTimeout(() => messageDiv.remove(), 3000);
+      }
+    }
+
+    async function deleteUser(backendId) {
+      const user = allUsers.find(u => u.__backendId === backendId);
+      if (!user) return;
+
+      const row = document.querySelector(`tr[data-user-id="${backendId}"]`);
+      const deleteBtn = row.querySelector('.btn-delete');
+      
+      if (deleteBtn.textContent === 'تأكيد الحذف؟') {
+        deleteBtn.disabled = true;
+        deleteBtn.innerHTML = '<span class="loading-spinner"></span>';
+
+        const result = await window.dataSdk.delete(user);
+
+        if (!result.isOk) {
+          deleteBtn.disabled = false;
+          deleteBtn.textContent = 'حذف';
+          const messageDiv = document.createElement('div');
+          messageDiv.className = 'message message-error';
+          messageDiv.textContent = '❌ حدث خطأ. حاول مرة أخرى';
+          document.querySelector('.admin-header').after(messageDiv);
+          setTimeout(() => messageDiv.remove(), 3000);
+        }
+      } else {
+        deleteBtn.textContent = 'تأكيد الحذف؟';
+        deleteBtn.style.background = 'linear-gradient(135deg, #f56565 0%, #e53e3e 100%)';
+        setTimeout(() => {
+          deleteBtn.textContent = 'حذف';
+          deleteBtn.style.background = '';
+        }, 3000);
+      }
+    }
+
+    function showMessage(elementId, message, isError = false) {
+      const messageDiv = document.getElementById(elementId);
+      messageDiv.innerHTML = `<div class="message ${isError ? 'message-error' : 'message-success'}">${message}</div>`;
+    }
+
+    function clearMessages() {
+      document.getElementById('loginMessage').innerHTML = '';
+      document.getElementById('registerMessage').innerHTML = '';
+      document.getElementById('adminLoginMessage').innerHTML = '';
+    }
+
+    async function handleRegister(event) {
+      event.preventDefault();
+
+      if (allUsers.length >= 999) {
+        showMessage('registerMessage', '❌ تم الوصول للحد الأقصى من المستخدمين', true);
+        return false;
+      }
+      
+      const name = document.getElementById('registerName').value.trim();
+      const phone = document.getElementById('registerPhone').value.trim();
+      const location = document.getElementById('registerLocation').value.trim();
+      const password = document.getElementById('registerPassword').value;
+      const confirmPassword = document.getElementById('registerConfirmPassword').value;
+      const role = document.getElementById('registerRole').value;
+
+      if (!role) {
+        showMessage('registerMessage', '❌ الرجاء اختيار نوع الحساب', true);
+        return false;
+      }
+
+      if (password !== confirmPassword) {
+        showMessage('registerMessage', '❌ كلمة المرور غير متطابقة', true);
+        return false;
+      }
+
+      if (password.length < 6) {
+        showMessage('registerMessage', '❌ كلمة المرور يجب أن تكون 6 أحرف على الأقل', true);
+        return false;
+      }
+
+      const existingUser = allUsers.find(u => u.phone === phone);
+      if (existingUser) {
+        showMessage('registerMessage', '❌ رقم الهاتف مسجل بالفعل', true);
+        return false;
+      }
+
+      const registerBtn = document.getElementById('registerBtn');
+      const registerBtnText = document.getElementById('registerBtnText');
+      registerBtn.disabled = true;
+      registerBtnText.innerHTML = '<span class="loading-spinner"></span>';
+
+      try {
+        const newUser = {
+          user_id: 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+          name: name,
+          phone: phone,
+          password: password,
+          role: role,
+          location: location,
+          rating: 5.0,
+          total_ratings: 0,
+          created_at: new Date().toISOString(),
+          is_available: role === 'driver' ? true : null,
+          is_blocked: false,
+          is_approved: true
+        };
+
+        // Try serverless API first (Netlify Functions or other host)
+        let createdByServer = false;
+        try {
+          const resp = await fetch('/.netlify/functions/createUser', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newUser)
+          });
+
+            const text = await resp.text();
+            let json = null;
+            try { json = text ? JSON.parse(text) : null; } catch(e) { json = { raw: text }; }
+
+            if (resp.ok) {
+              if (json && json.isOk) {
+                createdByServer = true;
+              } else {
+                // treat as success if no explicit isOk but 200
+                createdByServer = true;
+              }
+            } else {
+              // show detailed server error if available
+              const serverMessage = (json && (json.error?.message || json.message)) || text || `Server error ${resp.status}`;
+              showMessage('registerMessage', `❌ ${serverMessage}`, true);
+              if (resp.status === 409 || (json && json.error && json.error.message === 'phone_exists')) {
+                throw new Error('phone_exists');
+              }
+              throw new Error(serverMessage);
+            }
+        } catch (e) {
+          // server not available or error — fallback to dataSdk (local/mock)
+        }
+
+        if (createdByServer) {
+          showMessage('registerMessage', '✅ تم إنشاء الحساب بنجاح! يمكنك الآن تسجيل الدخول', false);
+          event.target.reset();
+          selectedRole = null;
+          document.querySelectorAll('.role-option').forEach(option => option.classList.remove('selected'));
+          setTimeout(() => showLoginForm(), 2000);
+        } else {
+          if (!window.dataSdk) {
+            throw new Error('Data SDK not available');
+          }
+
+          const result = await window.dataSdk.create(newUser);
+
+          if (result.isOk) {
+            showMessage('registerMessage', '✅ تم إنشاء الحساب بنجاح! يمكنك الآن تسجيل الدخول', false);
+            event.target.reset();
+            selectedRole = null;
+            document.querySelectorAll('.role-option').forEach(option => {
+              option.classList.remove('selected');
+            });
+            setTimeout(() => {
+              showLoginForm();
+            }, 2000);
+          } else {
+            throw new Error(result.error?.message || 'فشل في إنشاء الحساب');
+          }
+        }
+      } catch (error) {
+        console.error('Registration error:', error);
+        showMessage('registerMessage', '❌ حدث خطأ. حاول مرة أخرى', true);
+      } finally {
+        registerBtn.disabled = false;
+        registerBtnText.textContent = 'إنشاء الحساب';
+      }
+      
+      return false;
+    }
+
+    async function handleLogin(event) {
+      event.preventDefault();
+      
+      const phone = document.getElementById('loginPhone').value.trim();
+      const password = document.getElementById('loginPassword').value;
+
+      if (!dataInitialized) {
+        showMessage('loginMessage', '⏳ جاري تحميل البيانات...', true);
+        await new Promise(resolve => setTimeout(resolve, 1500));
+      }
+
+      const loginBtn = document.getElementById('loginBtn');
+      loginBtn.disabled = true;
+      document.getElementById('loginBtnText').innerHTML = '<span class="loading-spinner"></span>';
+
+      await new Promise(resolve => setTimeout(resolve, 800));
+
+      const foundUser = allUsers.find(u => u.phone === phone && u.password === password);
+
+      loginBtn.disabled = false;
+      document.getElementById('loginBtnText').textContent = 'تسجيل الدخول';
+
+      if (foundUser) {
+        if (foundUser.is_blocked) {
+          showMessage('loginMessage', '🚫 تم حظر هذا الحساب', true);
+          return false;
+        }
+        if (!foundUser.is_approved) {
+          showMessage('loginMessage', '⏳ في انتظار موافقة المسؤول', true);
+          return false;
+        }
+        
+        currentUser = foundUser;
+        showMessage('loginMessage', '✅ تم تسجيل الدخول بنجاح!', false);
+        
+        setTimeout(() => {
+          showDashboard(foundUser);
+        }, 1000);
+      } else {
+        showMessage('loginMessage', '❌ رقم الهاتف أو كلمة المرور غير صحيحة', true);
+        
+        if (allUsers.length === 0) {
+          showMessage('loginMessage', '⚠️ لا يوجد مستخدمون. قم بإنشاء حساب أولاً!', true);
+        }
+      }
+      
+      return false;
+    }
+
+    async function handleAdminLogin(event) {
+      event.preventDefault();
+      
+      const username = document.getElementById('adminUsername').value.trim();
+      const password = document.getElementById('adminPassword').value.trim();
+
+      const adminBtn = document.getElementById('adminLoginBtn');
+      const adminBtnText = document.getElementById('adminLoginBtnText');
+      
+      adminBtn.disabled = true;
+      adminBtnText.innerHTML = '<span class="loading-spinner"></span>';
+
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      const adminUsername = defaultConfig.admin_username;
+      const adminPassword = defaultConfig.admin_password;
+
+      if (username === adminUsername && password === adminPassword) {
+        currentUser = { role: 'admin', name: 'المسؤول' };
+        showMessage('adminLoginMessage', '✅ تم تسجيل الدخول بنجاح!', false);
+        
+        adminBtn.disabled = false;
+        adminBtnText.textContent = 'دخول';
+        
+        setTimeout(() => {
+          showDashboard(currentUser);
+        }, 1000);
+      } else {
+        adminBtn.disabled = false;
+        adminBtnText.textContent = 'دخول';
+        showMessage('adminLoginMessage', '❌ اسم المستخدم أو كلمة المرور غير صحيحة', true);
+      }
+      
+      return false;
+    }
+
+    function handleLogout() {
+      currentUser = null;
+      document.getElementById('adminDashboard').classList.add('hidden');
+      document.getElementById('dashboard').classList.add('hidden');
+      showLoginForm();
+    }
+
+    // Edit User Modal Functions
+    let editingUserId = null;
+
+    function openEditModal(backendId) {
+      const user = allUsers.find(u => u.__backendId === backendId);
+      if (!user) return;
+
+      editingUserId = backendId;
+      document.getElementById('editName').value = user.name;
+      document.getElementById('editPhone').value = user.phone;
+      document.getElementById('editLocation').value = user.location;
+      document.getElementById('editRole').value = user.role;
+      document.getElementById('editUserMessage').innerHTML = '';
+      document.getElementById('editUserModal').classList.remove('hidden');
+    }
+
+    function closeEditModal() {
+      editingUserId = null;
+      document.getElementById('editUserModal').classList.add('hidden');
+      document.getElementById('editUserMessage').innerHTML = '';
+    }
+
+    async function handleEditUser(event) {
+      event.preventDefault();
+      
+      const user = allUsers.find(u => u.__backendId === editingUserId);
+      if (!user) return false;
+
+      const name = document.getElementById('editName').value.trim();
+      const phone = document.getElementById('editPhone').value.trim();
+      const location = document.getElementById('editLocation').value;
+      const role = document.getElementById('editRole').value;
+
+      const phoneExists = allUsers.find(u => u.phone === phone && u.__backendId !== editingUserId);
+      if (phoneExists) {
+        showMessage('editUserMessage', '❌ رقم الهاتف مستخدم من قبل مستخدم آخر', true);
+        return false;
+      }
+
+      const editBtn = document.getElementById('editUserBtn');
+      editBtn.disabled = true;
+      document.getElementById('editUserBtnText').innerHTML = '<span class="loading-spinner"></span>';
+
+      const updatedUser = {
+        ...user,
+        name: name,
+        phone: phone,
+        location: location,
+        role: role
+      };
+
+      const result = await window.dataSdk.update(updatedUser);
+
+      editBtn.disabled = false;
+      document.getElementById('editUserBtnText').textContent = 'حفظ التعديلات';
+
+      if (result.isOk) {
+        showMessage('editUserMessage', '✅ تم تحديث البيانات بنجاح!', false);
+        setTimeout(() => {
+          closeEditModal();
+        }, 1500);
+      } else {
+        showMessage('editUserMessage', '❌ حدث خطأ. حاول مرة أخرى', true);
+      }
+
+      return false;
+    }
+
+    // Export Functions
+    function openExportModal() {
+      document.getElementById('exportModal').classList.remove('hidden');
+    }
+
+    function closeExportModal() {
+      document.getElementById('exportModal').classList.add('hidden');
+    }
+
+    function exportToCSV() {
+      const headers = ['الاسم', 'رقم الهاتف', 'النوع', 'المدينة', 'التقييم', 'تاريخ التسجيل', 'الحالة'];
+      const rows = allUsers.map(user => {
+        const roleLabel = user.role === 'agent' ? 'وكيل' : user.role === 'merchant' ? 'تاجر' : 'سائق';
+        const statusLabel = user.is_blocked ? 'محظور' : 'نشط';
+        const date = new Date(user.created_at).toLocaleDateString('ar-YE');
+        const rating = user.rating ? user.rating.toFixed(1) : '5.0';
+        
+        return [user.name, user.phone, roleLabel, user.location, rating, date, statusLabel];
+      });
+
+      let csvContent = '\uFEFF' + headers.join(',') + '\n';
+      rows.forEach(row => {
+        csvContent += row.map(cell => `"${cell}"`).join(',') + '\n';
+      });
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `users_report_${new Date().toISOString().split('T')[0]}.csv`;
+      link.click();
+      
+      showAdminMessage('✅ تم تصدير البيانات بنجاح!');
+      closeExportModal();
+    }
+
+    function exportToJSON() {
+      const exportData = allUsers.map(user => ({
+        name: user.name,
+        phone: user.phone,
+        role: user.role,
+        location: user.location,
+        rating: user.rating,
+        created_at: user.created_at,
+        is_blocked: user.is_blocked
+      }));
+
+      const jsonContent = JSON.stringify(exportData, null, 2);
+      const blob = new Blob([jsonContent], { type: 'application/json' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `users_data_${new Date().toISOString().split('T')[0]}.json`;
+      link.click();
+      
+      showAdminMessage('✅ تم تصدير البيانات بنجاح!');
+      closeExportModal();
+    }
+
+    function printReport() {
+      const printWindow = window.open('', '_blank');
+      const roleLabel = (role) => role === 'agent' ? 'وكيل' : role === 'merchant' ? 'تاجر' : 'سائق';
+      const statusLabel = (blocked) => blocked ? 'محظور' : 'نشط';
+      
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html lang="ar" dir="rtl">
+        <head>
+          <meta charset="UTF-8">
+          <title>تقرير المستخدمين - واصل</title>
+          <style>
+            body { font-family: 'Segoe UI', Arial, sans-serif; padding: 2rem; }
+            h1 { color: #667eea; text-align: center; margin-bottom: 2rem; }
+            table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+            th, td { border: 1px solid #ddd; padding: 0.75rem; text-align: right; }
+            th { background: #667eea; color: white; }
+            tr:nth-child(even) { background: #f8fafc; }
+            .date { text-align: center; color: #718096; margin-bottom: 2rem; }
+          </style>
+        </head>
+        <body>
+          <h1>تقرير المستخدمين - منصة واصل</h1>
+          <div class="date">تاريخ التقرير: ${new Date().toLocaleDateString('ar-YE')}</div>
+          <p><strong>إجمالي المستخدمين:</strong> ${allUsers.length}</p>
+          <table>
+            <thead>
+              <tr>
+                <th>الاسم</th>
+                <th>رقم الهاتف</th>
+                <th>النوع</th>
+                <th>المدينة</th>
+                <th>التقييم</th>
+                <th>الحالة</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${allUsers.map(user => `
+                <tr>
+                  <td>${user.name}</td>
+                  <td>${user.phone}</td>
+                  <td>${roleLabel(user.role)}</td>
+                  <td>${user.location}</td>
+                  <td>${user.rating ? user.rating.toFixed(1) : '5.0'}</td>
+                  <td>${statusLabel(user.is_blocked)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </body>
+        </html>
+      `;
+      
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+      setTimeout(() => {
+        printWindow.print();
+      }, 500);
+      
+      closeExportModal();
+    }
+
+    function sendBulkNotification() {
+      const message = '📢 تم إرسال إشعار جماعي لجميع المستخدمين!\n\nملاحظة: هذه ميزة تجريبية. في التطبيق الفعلي، سيتم إرسال الإشعارات عبر نظام الإشعارات الخاص بك.';
+      showAdminMessage(message);
+    }
+
+    function refreshData() {
+      showAdminMessage('🔄 جاري تحديث البيانات...');
+      setTimeout(() => {
+        updateAdminStats();
+        filterUsers();
+        showAdminMessage('✅ تم تحديث البيانات بنجاح!');
+      }, 800);
+    }
+
+    function showAdminMessage(message) {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = 'message message-success';
+      messageDiv.textContent = message;
+      messageDiv.style.position = 'fixed';
+      messageDiv.style.top = '2rem';
+      messageDiv.style.left = '50%';
+      messageDiv.style.transform = 'translateX(-50%)';
+      messageDiv.style.zIndex = '2000';
+      messageDiv.style.minWidth = '300px';
+      document.body.appendChild(messageDiv);
+      
+      setTimeout(() => {
+        messageDiv.style.opacity = '0';
+        messageDiv.style.transition = 'opacity 0.3s ease';
+        setTimeout(() => messageDiv.remove(), 300);
+      }, 3000);
+    }
+
+    initializeApp();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a5ca88d827b8e31',t:'MTc2NDM2MjE5Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

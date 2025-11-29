@@ -1,0 +1,17 @@
+{
+  "name": "wassel-local-server",
+  "version": "1.0.0",
+  "description": "Local server to persist users to users.xlsx for Wassel front-end",
+  "main": "index.html",
+  "scripts": {
+    "start": "netlify dev",
+    "build": "echo \"Static site – no build step\""
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "exceljs": "^4.3.0",
+    "googleapis": "^121.0.0",
+    "node-fetch": "^2.6.7"
+  }
+}

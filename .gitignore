@@ -1,0 +1,26 @@
+# Environment and secrets
+.env
+.env.local
+.env.*.local
+waseal-59eb61dd4d66.json
+CREDENTIALS_B64.txt
+
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+
+# Build
+dist/
+.netlify/
+.next/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
