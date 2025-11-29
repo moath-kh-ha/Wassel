@@ -17,7 +17,7 @@ exports.handler = async (event) => {
 
     // Validate against environment variables
     const adminUsername = process.env.ADMIN_USERNAME || '712345678';
-    const adminPassword = process.env.ADMIN_PASSWORD || 'password';
+    const adminPassword = process.env.ADMIN_PASSWORD || 'KHSHiph32001';
 
     if (username === adminUsername && password === adminPassword) {
       return { statusCode: 200, body: JSON.stringify({ isOk: true }) };

@@ -1442,10 +1442,18 @@
      <div class="availability-toggle"><label class="toggle-switch"> <input type="checkbox" id="driverAvailable" checked onchange="toggleAvailability()"> <span class="toggle-slider"></span> </label> <span class="toggle-label">متاح للعمل الآن</span>
      </div>
     <div class="dashboard-section">
-     <h3>🚚 طلبات للتوصيل</h3>
-     <div class="orders-list" id="driverOrders">
-      <!-- Example/demo orders removed. Orders received from the System will be rendered here. -->
-      <div class="empty-note">لا توجد طلبات جديدة حالياً</div>
+     <h3>📋 الطلبات المتاحة (للقبول)</h3>
+     <div id="driverOrdersMessage"></div>
+     <div class="orders-list" id="driverAvailableOrders">
+      <!-- Available orders will be loaded via polling -->
+      <div class="empty-note">جاري تحميل الطلبات...</div>
+     </div>
+    </div>
+    <div class="dashboard-section">
+     <h3>🚚 الطلبات النشطة (الرحلات الحالية)</h3>
+     <div class="orders-list" id="driverActiveOrders">
+      <!-- Driver's accepted orders will be displayed here -->
+      <div class="empty-note">لا توجد رحلات نشطة حالياً</div>
      </div>
     </div>
         </div>
@@ -1618,6 +1626,14 @@
       } catch (e) {
         // server not available — fallback to SDK/local
       }
+
+      // Start polling for drivers to load available orders every 5 seconds
+      if (currentUser && currentUser.role === 'driver') {
+        loadAvailableOrdersForDriver();
+        setInterval(loadAvailableOrdersForDriver, 5000);
+        loadActiveOrdersForDriver();
+        setInterval(loadActiveOrdersForDriver, 5000);
+      }
     }
 
     function togglePassword(inputId, iconElement) {
@@ -1702,6 +1718,9 @@
           } else if (user.role === 'driver') {
             document.getElementById('driverDashboard').classList.remove('hidden');
             document.getElementById('driverRating').textContent = user.rating ? user.rating.toFixed(1) : '5.0';
+            // Start polling for driver orders
+            loadAvailableOrdersForDriver();
+            loadActiveOrdersForDriver();
           }
         }
       }
@@ -2233,6 +2252,173 @@
       }
 
       return false;
+    }
+
+    // ========================
+    // DRIVER ORDER FUNCTIONS
+    // ========================
+
+    async function loadAvailableOrdersForDriver() {
+      if (!currentUser || currentUser.role !== 'driver') return;
+
+      try {
+        const resp = await fetch('/.netlify/functions/getAvailableOrders');
+        const orders = await resp.json();
+
+        if (Array.isArray(orders) && orders.length > 0) {
+          // Convert to display format with accept button
+          const displayOrders = orders.map(o => ({
+            order_id: o.order_id,
+            status: 'طلب جديد',
+            from: o.pickup_location,
+            to: o.drop_location,
+            total: o.price + ' ريال',
+            customer: o.goods_type,
+            date: new Date(o.created_at).toLocaleDateString('ar-YE'),
+            actions: [
+              {
+                label: 'قبول الطلب',
+                onClick: () => handleAcceptOrder(o.order_id)
+              }
+            ]
+          }));
+
+          window.renderOrders('driverAvailableOrders', displayOrders);
+
+          // Play notification sound
+          try {
+            const audio = new Audio('notification.mp3');
+            audio.volume = 0.5;
+            audio.play().catch(() => {}); // Ignore autoplay errors
+          } catch (e) {}
+        } else {
+          const container = document.getElementById('driverAvailableOrders');
+          if (container) {
+            container.innerHTML = '<div class="empty-note">لا توجد طلبات متاحة حالياً</div>';
+          }
+        }
+      } catch (e) {
+        console.log('Load available orders failed:', e);
+      }
+    }
+
+    async function handleAcceptOrder(orderId) {
+      if (!currentUser || currentUser.role !== 'driver') {
+        alert('❌ فقط السائقين يمكنهم قبول الطلبات');
+        return;
+      }
+
+      const confirmed = confirm('هل تأكد من قبول هذا الطلب؟ سيتم تحديث حالة الطلب إلى "مقبول"');
+      if (!confirmed) return;
+
+      try {
+        const resp = await fetch('/.netlify/functions/updateOrderStatus', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            order_id: orderId,
+            new_status: 'accepted',
+            driver_id: currentUser.user_id
+          })
+        });
+
+        const result = await resp.json();
+
+        if (result.isOk) {
+          alert('✅ تم قبول الطلب بنجاح! يمكنك الآن بدء الرحلة.');
+          // Reload both lists
+          await loadAvailableOrdersForDriver();
+          await loadActiveOrdersForDriver();
+        } else {
+          alert('❌ فشل قبول الطلب: ' + (result.error?.message || 'خطأ غير معروف'));
+        }
+      } catch (error) {
+        console.error('Accept order error:', error);
+        alert('❌ خطأ في الاتصال. حاول مرة أخرى');
+      }
+    }
+
+    async function loadActiveOrdersForDriver() {
+      if (!currentUser || currentUser.role !== 'driver') return;
+
+      try {
+        const resp = await fetch('/.netlify/functions/getOrdersByDriver?driver_id=' + currentUser.user_id);
+        const orders = await resp.json();
+
+        if (Array.isArray(orders) && orders.length > 0) {
+          const displayOrders = orders.map(o => ({
+            order_id: o.order_id,
+            status: o.status === 'accepted' ? 'جاري الاستلام' : 'جاري التسليم',
+            from: o.pickup_location,
+            to: o.drop_location,
+            total: o.price + ' ريال',
+            customer: o.goods_type,
+            date: new Date(o.created_at).toLocaleDateString('ar-YE'),
+            actions: o.status === 'accepted' 
+              ? [
+                  {
+                    label: 'تم الاستلام',
+                    onClick: () => handleUpdateOrderStatus(o.order_id, 'picked')
+                  }
+                ]
+              : [
+                  {
+                    label: 'تم التسليم',
+                    onClick: () => handleUpdateOrderStatus(o.order_id, 'delivered')
+                  }
+                ]
+          }));
+
+          window.renderOrders('driverActiveOrders', displayOrders);
+        } else {
+          const container = document.getElementById('driverActiveOrders');
+          if (container) {
+            container.innerHTML = '<div class="empty-note">لا توجد رحلات نشطة حالياً</div>';
+          }
+        }
+      } catch (e) {
+        console.log('Load active orders failed:', e);
+      }
+    }
+
+    async function handleUpdateOrderStatus(orderId, newStatus) {
+      if (!currentUser || currentUser.role !== 'driver') {
+        alert('❌ خطأ في المصادقة');
+        return;
+      }
+
+      const statusMessages = {
+        'picked': 'تم استلام البضاعة',
+        'delivered': 'تم تسليم البضاعة'
+      };
+
+      const confirmed = confirm(`هل تأكد من أن ${statusMessages[newStatus]}؟`);
+      if (!confirmed) return;
+
+      try {
+        const resp = await fetch('/.netlify/functions/updateOrderStatus', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            order_id: orderId,
+            new_status: newStatus,
+            driver_id: currentUser.user_id
+          })
+        });
+
+        const result = await resp.json();
+
+        if (result.isOk) {
+          alert('✅ تم تحديث حالة الطلب بنجاح!');
+          // Reload
+          await loadActiveOrdersForDriver();
+        } else {
+          alert('❌ فشل التحديث: ' + (result.error?.message || 'خطأ غير معروف'));
+        }
+      } catch (error) {
+        console.error('Update order status error:', error);
+        alert('❌ خطأ في الاتصال. حاول مرة أخرى');
+      }
     }
 
     // Export Functions
