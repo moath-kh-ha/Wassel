@@ -43,6 +43,7 @@ exports.handler = async function(event) {
         rating: typeof f.Rating === 'number' ? f.Rating : parseFloat(f.Rating) || 5.0,
         created_at: f.CreatedAt || new Date().toISOString(),
         is_blocked: !!f.IsBlocked,
+        is_approved: !!f.IsApproved,
         user_id: f.UserId || '',
         __backendId: f.BackendId || rec.id
       };

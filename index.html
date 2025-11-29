@@ -155,27 +155,26 @@
     .btn-primary:hover {
       transform: translateY(-3px);
       box-shadow: 0 10px 30px rgba(99,102,241,0.18), 0 0 24px rgba(139,92,246,0.12) inset;
-    }
+            const text = await resp.text();
+            let json = null;
+            try { json = text ? JSON.parse(text) : null; } catch(e) { json = { raw: text }; }
 
-    /* Inputs and interactive elements subtle glow */
-    input[type="text"], input[type="password"], textarea, select {
-      transition: box-shadow 180ms ease, transform 160ms ease;
-    }
-    input[type="text"]:focus, input[type="password"]:focus, textarea:focus, select:focus {
-      box-shadow: 0 6px 20px rgba(99,102,241,0.08);
-      transform: translateY(-1px);
-      outline: none;
-    }
-
-    @media (max-width: 540px) {
-      .logout-btn { top: 10px; left: 10px; padding: 8px 10px; }
-      .logout-btn .label { display:none; }
-      .logout-btn .icon { font-size: 16px; }
-    }
-
-    h2 {
-      text-align: center;
-      color: #1a202c;
+            if (resp.ok) {
+              // treat as success if we get 200; returned body may contain isOk
+              createdByServer = true;
+            } else {
+              // show detailed server error if available
+              const serverMessage = (json && (json.error?.message || json.message)) || text || `Server error ${resp.status}`;
+              showMessage('registerMessage', `❌ ${serverMessage}`, true);
+              if (resp.status === 409 || (json && json.error && json.error.message === 'phone_exists')) {
+                throw new Error('phone_exists');
+              }
+              throw new Error(serverMessage);
+            }
+          } catch (innerErr) {
+            // server not available or error — show message so user knows why
+            console.warn('createUser_gs call failed:', innerErr);
+            showMessage('registerMessage', '❌ تعذر الاتصال بخادم التسجيل. سيتم المحاولة محلياً إن أمكن.', true);
       margin-bottom: 2.5rem;
       font-size: 2rem;
       font-weight: 800;
@@ -786,6 +785,12 @@
       background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
       color: white;
       border: 2px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .status-pending {
+      background: linear-gradient(135deg, #f6ad55 0%, #ed8936 100%);
+      color: white;
+      border: 2px solid rgba(246, 173, 85, 0.3);
     }
 
     .action-btns {
@@ -1549,7 +1554,11 @@
      <h1>🔐 لوحة تحكم المسؤول</h1>
      <p class="admin-subtitle">إدارة المستخدمين والنظام</p>
     </div>
-    <div class="admin-toolbar"><button class="btn btn-primary" onclick="openExportModal()"> 📊 تصدير البيانات </button> <button class="btn btn-primary" onclick="sendBulkNotification()"> 📢 إرسال إشعار جماعي </button> <button class="btn btn-secondary" onclick="refreshData()"> 🔄 تحديث البيانات </button>
+    <div class="admin-toolbar">
+      <button class="btn btn-primary" onclick="openExportModal()"> 📊 تصدير البيانات </button>
+      <button class="btn btn-primary" onclick="sendBulkNotification()"> 📢 إرسال إشعار جماعي </button>
+      <button class="btn btn-secondary" onclick="refreshData()"> 🔄 تحديث البيانات </button>
+      <button id="bulkApproveBtn" class="btn btn-primary" onclick="bulkApproveSelected()" disabled> ✅ موافقة المحدد</button>
     </div>
     <div class="stats-grid">
      <div class="stat-card">
@@ -1609,6 +1618,7 @@
      <table class="users-table">
       <thead>
        <tr>
+        <th style="width:48px;text-align:center"><input id="selectAllUsers" type="checkbox" onclick="toggleSelectAll(this.checked)"></th>
         <th>الاسم</th>
         <th>رقم الهاتف</th>
         <th>النوع</th>
@@ -1622,8 +1632,6 @@
       <tbody id="usersTableBody"><!-- Users will be populated here -->
       </tbody>
      </table>
-    </div>
-    <div class="admin-actions"><button class="logout-btn" onclick="handleLogout()" aria-label="تسجيل الخروج">🔒 خروج</button>
     </div>
    </div><!-- Edit User Modal -->
    <div id="editUserModal" class="modal hidden">
@@ -1692,7 +1700,8 @@
 
       // Try loading users from serverless endpoint (Netlify Functions / other hosting)
       try {
-        const resp = await fetch('/.netlify/functions/getUsers');
+        // Prefer Google Sheets-backed users endpoint in this deployment
+        const resp = await fetch('/.netlify/functions/getUsers_gs');
         if (resp.ok) {
           const users = await resp.json();
           if (Array.isArray(users)) {
@@ -1704,9 +1713,15 @@
               filterUsers();
             }
           }
+        } else {
+          // show a debug message when server returns non-OK
+          const txt = await resp.text();
+          document.getElementById('debugInfo').textContent = 'خطأ في جلب المستخدمين من الخادم: ' + (txt || resp.status);
         }
       } catch (e) {
         // server not available — fallback to SDK/local
+        document.getElementById('debugInfo').textContent = 'تعذر الاتصال بخدمة المستخدمين (serverless). العمل في الوضع الوِعائي المحلي.';
+        console.warn('getUsers_gs failed:', e);
       }
 
       // Start polling for drivers to load available orders every 5 seconds
@@ -1796,6 +1811,27 @@
       if (user && user.role === 'admin') {
         document.getElementById('adminDashboard').classList.remove('hidden');
         loadAdminDashboard();
+        // start polling users for admin so new registrations appear without manual refresh
+        try {
+          if (window._adminUsersInterval) clearInterval(window._adminUsersInterval);
+          window._adminUsersInterval = setInterval(async () => {
+            try {
+              const r = await fetch('/.netlify/functions/getUsers_gs');
+              if (r.ok) {
+                const users = await r.json();
+                if (Array.isArray(users)) {
+                  allUsers = users;
+                  document.getElementById('userCount').textContent = allUsers.length;
+                  updateAdminStats();
+                  filterUsers();
+                }
+              }
+            } catch (e) {
+              // ignore polling errors but log
+              console.warn('admin users polling failed', e);
+            }
+          }, 5000);
+        } catch (e) {}
         showLogout(true);
       } else if (user) {
         document.getElementById('dashboard').classList.remove('hidden');
@@ -1897,7 +1933,7 @@
       const tbody = document.getElementById('usersTableBody');
       
       if (users.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="no-users">لا يوجد مستخدمون</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" class="no-users">لا يوجد مستخدمون</td></tr>';
         return;
       }
 
@@ -1905,13 +1941,24 @@
         const roleLabel = user.role === 'agent' ? 'وكيل' : 
                          user.role === 'merchant' ? 'تاجر' : 'سائق';
         const roleClass = `role-${user.role}`;
-        const statusLabel = user.is_blocked ? 'محظور' : 'نشط';
-        const statusClass = user.is_blocked ? 'status-blocked' : 'status-active';
+        let statusLabel = '';
+        let statusClass = '';
+        if (!user.is_approved) {
+          statusLabel = 'في انتظار الموافقة';
+          statusClass = 'status-pending';
+        } else if (user.is_blocked) {
+          statusLabel = 'محظور';
+          statusClass = 'status-blocked';
+        } else {
+          statusLabel = 'نشط';
+          statusClass = 'status-active';
+        }
         const date = new Date(user.created_at).toLocaleDateString('ar-YE');
         const rating = user.rating ? user.rating.toFixed(1) : '5.0';
 
         return `
           <tr data-user-id="${user.__backendId}">
+            <td style="text-align:center"><input type="checkbox" class="user-select-checkbox" data-backendid="${user.__backendId}" onchange="toggleUserSelection('${user.__backendId}', this.checked)"></td>
             <td>${user.name}</td>
             <td>${user.phone}</td>
             <td><span class="role-badge ${roleClass}">${roleLabel}</span></td>
@@ -1926,6 +1973,7 @@
                   `<button class="btn-action btn-unblock" onclick="toggleBlockUser('${user.__backendId}', false)">رفع الحظر</button>` :
                   `<button class="btn-action btn-block" onclick="toggleBlockUser('${user.__backendId}', true)">حظر</button>`
                 }
+                ${!user.is_approved ? `<button class="btn-action btn-primary" onclick="approveUser('${user.__backendId}')">موافقة</button>` : ''}
                 <button class="btn-action btn-delete" onclick="deleteUser('${user.__backendId}')">حذف</button>
               </div>
             </td>
@@ -1988,6 +2036,104 @@
           deleteBtn.style.background = '';
         }, 3000);
       }
+    }
+
+    async function approveUser(backendId) {
+      if (!confirm('هل تريد فعلاً الموافقة على هذا المستخدم؟')) return;
+      try {
+        const resp = await fetch('/.netlify/functions/updateUser_gs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ __backendId: backendId, updates: { is_approved: true } })
+        });
+        const result = await resp.json();
+        if (result.isOk) {
+          showAdminMessage('✅ تم الموافقة على المستخدم');
+          // refresh users list
+          const r = await fetch('/.netlify/functions/getUsers_gs');
+          if (r.ok) {
+            const users = await r.json();
+            allUsers = Array.isArray(users) ? users : allUsers;
+            updateAdminStats();
+            filterUsers();
+          }
+        } else {
+          showAdminMessage('❌ فشل الموافقة: ' + (result.error?.message || 'خطأ غير معروف'));
+        }
+      } catch (e) {
+        console.error('Approve user error:', e);
+        showAdminMessage('❌ خطأ في الاتصال. حاول مرة أخرى');
+      }
+    }
+
+    // Selection and bulk-approve helpers
+    let selectedUserIds = new Set();
+
+    function toggleUserSelection(backendId, checked) {
+      if (checked) selectedUserIds.add(backendId);
+      else selectedUserIds.delete(backendId);
+      updateBulkApproveButtonState();
+    }
+
+    function toggleSelectAll(checked) {
+      document.querySelectorAll('.user-select-checkbox').forEach(cb => {
+        cb.checked = checked;
+        const id = cb.getAttribute('data-backendid');
+        if (checked) selectedUserIds.add(id); else selectedUserIds.delete(id);
+      });
+      updateBulkApproveButtonState();
+    }
+
+    function updateBulkApproveButtonState() {
+      const btn = document.getElementById('bulkApproveBtn');
+      if (!btn) return;
+      btn.disabled = selectedUserIds.size === 0;
+      btn.textContent = selectedUserIds.size === 0 ? '✅ موافقة المحدد' : `✅ موافقة (${selectedUserIds.size})`;
+    }
+
+    async function bulkApproveSelected() {
+      if (selectedUserIds.size === 0) return;
+      if (!confirm(`هل تريد الموافقة على ${selectedUserIds.size} مستخدم(ين) المحدد؟`)) return;
+      const ids = Array.from(selectedUserIds);
+      const btn = document.getElementById('bulkApproveBtn');
+      btn.disabled = true;
+      const originalText = btn.textContent;
+      btn.textContent = '⏳ جارٍ الموافقة...';
+
+      let success = 0;
+      let failed = 0;
+      for (const id of ids) {
+        try {
+          const resp = await fetch('/.netlify/functions/updateUser_gs', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ __backendId: id, updates: { is_approved: true } })
+          });
+          const r = await resp.json();
+          if (r.isOk) success++; else failed++;
+        } catch (e) {
+          failed++;
+        }
+      }
+
+      // Refresh users list
+      try {
+        const r = await fetch('/.netlify/functions/getUsers_gs');
+        if (r.ok) {
+          const users = await r.json();
+          allUsers = Array.isArray(users) ? users : allUsers;
+        }
+      } catch (e) {}
+
+      selectedUserIds.clear();
+      document.getElementById('selectAllUsers').checked = false;
+      document.querySelectorAll('.user-select-checkbox').forEach(cb => cb.checked = false);
+      updateAdminStats();
+      filterUsers();
+      updateBulkApproveButtonState();
+
+      showAdminMessage(`✅ تمت الموافقة: ${success}، فشل: ${failed}`);
+      btn.textContent = originalText;
     }
 
     function showMessage(elementId, message, isError = false) {
@@ -2055,13 +2201,15 @@
           created_at: new Date().toISOString(),
           is_available: role === 'driver' ? true : null,
           is_blocked: false,
-          is_approved: true
+          // New users require admin approval by default
+          is_approved: false
         };
 
         // Try serverless API first (Netlify Functions or other host)
+        // Prefer Google Sheets-backed function for this project (createUser_gs)
         let createdByServer = false;
         try {
-          const resp = await fetch('/.netlify/functions/createUser', {
+          const resp = await fetch('/.netlify/functions/createUser_gs', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(newUser)

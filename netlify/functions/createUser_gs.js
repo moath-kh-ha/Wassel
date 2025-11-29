@@ -64,20 +64,21 @@ exports.handler = async function(event) {
       return { statusCode: 409, body: JSON.stringify({ isOk: false, error: { message: 'phone_exists' } }) };
     }
 
-    // Prepare row: Name,Phone,Role,Location,Rating,CreatedAt,IsBlocked,UserId,BackendId
+    // Prepare row: Name,Phone,Role,Location,Rating,CreatedAt,IsApproved,IsBlocked,UserId,BackendId
     const userId = payload.user_id || ('user_' + Date.now() + '_' + Math.random().toString(36).substr(2,9));
     const backendId = payload.__backendId || ('b_' + Date.now() + '_' + Math.random().toString(36).substr(2,9));
     const createdAt = payload.created_at || new Date().toISOString();
-    const row = [payload.name, payload.phone, payload.role, payload.location || '', payload.rating || 5.0, createdAt, payload.is_blocked ? 'true' : 'false', userId, backendId];
+    const isApproved = payload.is_approved ? 'true' : 'false';
+    const row = [payload.name, payload.phone, payload.role, payload.location || '', payload.rating || 5.0, createdAt, isApproved, payload.is_blocked ? 'true' : 'false', userId, backendId];
 
     await sheets.spreadsheets.values.append({
       spreadsheetId,
-      range: `${sheetName}!A:I`,
+      range: `${sheetName}!A:J`,
       valueInputOption: 'RAW',
       requestBody: { values: [row] }
     });
 
-    return { statusCode: 200, body: JSON.stringify({ isOk: true, user: { ...payload, user_id: userId, __backendId: backendId, created_at: createdAt } }) };
+    return { statusCode: 200, body: JSON.stringify({ isOk: true, user: { ...payload, user_id: userId, __backendId: backendId, created_at: createdAt, is_approved: payload.is_approved || false } }) };
   } catch (e) {
     return { statusCode: 500, body: JSON.stringify({ isOk: false, error: { message: e.message } }) };
   }

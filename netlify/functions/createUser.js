@@ -34,6 +34,7 @@ exports.handler = async function(event) {
       Rating: payload.rating || 5.0,
       CreatedAt: payload.created_at || new Date().toISOString(),
       IsBlocked: payload.is_blocked ? true : false,
+      IsApproved: payload.is_approved ? true : false,
       UserId: payload.user_id || '',
       BackendId: payload.__backendId || ''
     };

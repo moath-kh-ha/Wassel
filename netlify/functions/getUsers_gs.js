@@ -51,7 +51,7 @@ exports.handler = async function(event) {
     const spreadsheetId = process.env.GOOGLE_SHEETS_ID;
     if (!spreadsheetId) return { statusCode: 500, body: JSON.stringify({ isOk: false, error: { message: 'missing_spreadsheet_id' } }) };
     const sheetName = process.env.GOOGLE_SHEETS_RANGE || 'Users';
-    const range = `${sheetName}!A2:I`;
+    const range = `${sheetName}!A2:J`;
 
     const resp = await sheets.spreadsheets.values.get({ spreadsheetId, range });
     const rows = resp.data.values || [];
@@ -63,9 +63,11 @@ exports.handler = async function(event) {
       location: row[3] || '',
       rating: row[4] ? parseFloat(row[4]) : 5.0,
       created_at: row[5] || new Date().toISOString(),
-      is_blocked: row[6] === 'true',
-      user_id: row[7] || '',
-      __backendId: row[8] || ''
+      // New sheet layout: IsApproved at col G (row[6]), IsBlocked at H (row[7])
+      is_approved: row[6] === 'true',
+      is_blocked: row[7] === 'true',
+      user_id: row[8] || '',
+      __backendId: row[9] || ''
     }));
 
     return { statusCode: 200, body: JSON.stringify(users) };
