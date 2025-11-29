@@ -2,7 +2,13 @@
 <html lang="ar" dir="rtl">
  <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="واصل">
+  <meta name="theme-color" content="#1a1a2e">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect fill='%231a1a2e' width='180' height='180'/><text x='50%' y='50%' font-size='90' fill='%23fff' text-anchor='middle' dominant-baseline='middle' font-family='Arial' font-weight='bold'>و</text></svg>">
   <title>واصل - تسجيل الدخول</title>
   <script src="./_sdk/data_sdk.js"></script>
   <script src="./_sdk/element_sdk.js"></script>
@@ -2856,6 +2862,213 @@
           window.System.on('order', (order) => handleSystemOrder(order, order.role));
         }
       } catch (e) {}
+    })();
+
+    // ==========================================
+    // PWA Installation Prompt Logic
+    // ==========================================
+    (function() {
+      // Register service worker
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => console.log('[PWA] Service Worker registered:', reg))
+          .catch(err => console.log('[PWA] Service Worker error:', err));
+      }
+
+      // PWA Install Prompt
+      let deferredPrompt;
+      const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+      // Detect if already installed
+      const isInstalled = window.matchMedia('(display-mode: standalone)').matches ||
+                          navigator.standalone === true ||
+                          document.referrer.includes('android-app://');
+
+      if (isMobile && !isInstalled) {
+        // Listen for beforeinstallprompt event
+        window.addEventListener('beforeinstallprompt', (e) => {
+          e.preventDefault();
+          deferredPrompt = e;
+          showInstallPrompt();
+        });
+
+        // For iOS, show custom banner since iOS doesn't support beforeinstallprompt
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        if (isIOS && !isInstalled) {
+          showIOSInstallBanner();
+        }
+      }
+
+      function showInstallPrompt() {
+        // Create install banner
+        const banner = document.createElement('div');
+        banner.id = 'pwa-install-banner';
+        banner.style.cssText = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+          color: white;
+          padding: 12px 16px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          z-index: 9999;
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        `;
+
+        const content = document.createElement('div');
+        content.style.cssText = `
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          flex: 1;
+        `;
+
+        const icon = document.createElement('span');
+        icon.textContent = '📱';
+        icon.style.fontSize = '20px';
+
+        const text = document.createElement('div');
+        text.style.cssText = `
+          font-size: 14px;
+          font-weight: 500;
+        `;
+        text.innerHTML = '<strong>تثبيت واصل</strong><br><small style="opacity: 0.9">ثبت التطبيق على جهازك للوصول السريع</small>';
+
+        content.appendChild(icon);
+        content.appendChild(text);
+
+        const actions = document.createElement('div');
+        actions.style.cssText = `
+          display: flex;
+          gap: 8px;
+        `;
+
+        const installBtn = document.createElement('button');
+        installBtn.textContent = 'تثبيت';
+        installBtn.style.cssText = `
+          background: white;
+          color: #6366f1;
+          border: none;
+          padding: 6px 16px;
+          border-radius: 6px;
+          font-weight: 600;
+          cursor: pointer;
+          font-size: 13px;
+        `;
+
+        const closeBtn = document.createElement('button');
+        closeBtn.textContent = '✕';
+        closeBtn.style.cssText = `
+          background: transparent;
+          color: white;
+          border: none;
+          font-size: 18px;
+          cursor: pointer;
+          padding: 0 8px;
+        `;
+
+        installBtn.addEventListener('click', async () => {
+          if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`[PWA] User response: ${outcome}`);
+            deferredPrompt = null;
+            banner.style.display = 'none';
+          }
+        });
+
+        closeBtn.addEventListener('click', () => {
+          banner.style.display = 'none';
+          localStorage.setItem('pwa-banner-dismissed', Date.now());
+        });
+
+        actions.appendChild(installBtn);
+        actions.appendChild(closeBtn);
+
+        banner.appendChild(content);
+        banner.appendChild(actions);
+
+        // Only show if not recently dismissed
+        const dismissed = localStorage.getItem('pwa-banner-dismissed');
+        const oneDayMs = 24 * 60 * 60 * 1000;
+        if (!dismissed || Date.now() - parseInt(dismissed) > oneDayMs) {
+          document.body.insertBefore(banner, document.body.firstChild);
+        }
+      }
+
+      function showIOSInstallBanner() {
+        // iOS custom banner (since iOS doesn't support beforeinstallprompt)
+        const banner = document.createElement('div');
+        banner.id = 'pwa-ios-banner';
+        banner.style.cssText = `
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+          color: white;
+          padding: 12px 16px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          z-index: 9999;
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
+        `;
+
+        const content = document.createElement('div');
+        content.style.cssText = `
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          flex: 1;
+        `;
+
+        const icon = document.createElement('span');
+        icon.textContent = '📱';
+        icon.style.fontSize = '20px';
+
+        const text = document.createElement('div');
+        text.style.cssText = `
+          font-size: 13px;
+          font-weight: 500;
+        `;
+        text.innerHTML = '<strong>تثبيت واصل</strong><br><small style="opacity: 0.9">انقر: مشاركة <svg style="width:16px;height:16px;display:inline;margin:0 4px" viewBox="0 0 24 24" fill="white"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg> ثم أضف للشاشة الرئيسية</small>';
+
+        const closeBtn = document.createElement('button');
+        closeBtn.textContent = '✕';
+        closeBtn.style.cssText = `
+          background: transparent;
+          color: white;
+          border: none;
+          font-size: 18px;
+          cursor: pointer;
+          padding: 0 8px;
+        `;
+
+        closeBtn.addEventListener('click', () => {
+          banner.style.display = 'none';
+          localStorage.setItem('pwa-ios-banner-dismissed', Date.now());
+        });
+
+        content.appendChild(icon);
+        content.appendChild(text);
+        banner.appendChild(content);
+        banner.appendChild(closeBtn);
+
+        // Only show if not recently dismissed
+        const dismissed = localStorage.getItem('pwa-ios-banner-dismissed');
+        const oneDayMs = 24 * 60 * 60 * 1000;
+        if (!dismissed || Date.now() - parseInt(dismissed) > oneDayMs) {
+          document.body.appendChild(banner);
+        }
+      }
     })();
   </script>
  <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a5ca88d827b8e31',t:'MTc2NDM2MjE5Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
