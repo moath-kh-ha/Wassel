@@ -1192,10 +1192,10 @@
     <h2>تسجيل دخول المسؤول</h2>
     <div id="adminLoginMessage"></div>
     <form onsubmit="return handleAdminLogin(event)">
-     <div class="form-group"><label for="adminUsername">👤 اسم المستخدم</label> <input type="text" id="adminUsername" required placeholder="711778058">
+     <div class="form-group"><label for="adminUsername">👤 اسم المستخدم</label> <input type="text" id="adminUsername" required placeholder="712345678">
      </div>
      <div class="form-group"><label for="adminPassword">🔑 كلمة المرور</label>
-      <div class="password-wrapper"><input type="password" id="adminPassword" required placeholder="KHSHiph32001"> <span class="password-toggle" onclick="togglePassword('adminPassword', this)">🔒</span>
+      <div class="password-wrapper"><input type="password" id="adminPassword" required placeholder="**********"> <span class="password-toggle" onclick="togglePassword('adminPassword', this)">🔒</span>
       </div>
      </div><button type="submit" class="btn btn-primary" id="adminLoginBtn"> <span id="adminLoginBtnText">دخول</span> </button>
     </form>
@@ -1246,7 +1246,7 @@
      </div>
      <div class="form-group"><label for="registerPhone">📱 رقم الهاتف</label> <input type="tel" id="registerPhone" required placeholder="777123456">
      </div>
-     <div class="form-group"><label for="registerLocation">📍 المدينة</label> <select id="registerLocation" required> <option value="">اختر المدينة</option> <option value="صنعاء">صنعاء</option> <option value="عدن">عدن</option> <option value="تعز">تعز</option> <option value="الحديدة">الحديدة</option> </select>
+     <div class="form-group"><label for="registerLocation">📍 المدينة</label> <select id="registerLocation" required> <option value="">اختر المدينة</option> <option value="صنعاء">صنعاء</option> <option value="عدن">عدن</option> <option value="تعز / المدينه / المدينه">تعز</option> <option value="تعز / الحوبان / الحوبان">تعز</option><option value="الحديدة">الحديدة</option> </select>
      </div>
      <div class="form-group"><label for="registerPassword">🔒 كلمة المرور (6 أحرف كحد أدنى)</label>
       <div class="password-wrapper"><input type="password" id="registerPassword" required placeholder="أدخل كلمة المرور" minlength="6"> <span class="password-toggle" onclick="togglePassword('registerPassword', this)">🔒</span>
@@ -1313,29 +1313,29 @@
        </div>
       </div>
      </div>
-     <div class="dashboard-section">
-      <h3>📋 الطلبات الأخيرة</h3>
-      <div class="orders-list">
-       <div class="order-card">
-        <div class="order-header"><span class="order-id">#12456</span> <span class="status-badge status-active">قيد التوصيل</span>
-        </div>
-        <div class="order-details">
-         <p>📍 من: صنعاء - إلى: عدن</p>
-         <p>💰 المبلغ: 1,500 ريال</p>
-         <p>📅 التاريخ: اليوم</p>
-        </div>
-       </div>
-       <div class="order-card">
-        <div class="order-header"><span class="order-id">#12455</span> <span class="status-badge status-active">جاهز للشحن</span>
-        </div>
-        <div class="order-details">
-         <p>📍 من: تعز - إلى: الحديدة</p>
-         <p>💰 المبلغ: 2,000 ريال</p>
-         <p>📅 التاريخ: أمس</p>
-        </div>
-       </div>
+    <div class="dashboard-section">
+     <h3>📦 إنشاء طلب نقل جديد</h3>
+     <div id="createOrderMessage"></div>
+     <form onsubmit="return handleCreateOrder(event)">
+      <div class="form-group"><label for="goodsType">نوع البضاعة</label> <input type="text" id="goodsType" placeholder="مثال: أدوات، ملابس، إلكترونيات..." required>
       </div>
+      <div class="form-group"><label for="orderWeight">الوزن (كيلوجرام)</label> <input type="number" id="orderWeight" placeholder="50" min="1" step="0.1" required>
+      </div>
+      <div class="form-group"><label for="orderPrice">السعر المقترح (ريال)</label> <input type="number" id="orderPrice" placeholder="1000" min="1" required>
+      </div>
+      <div class="form-group"><label for="pickupLocation">موقع الاستلام</label> <input type="text" id="pickupLocation" placeholder="صنعاء" required>
+      </div>
+      <div class="form-group"><label for="dropLocation">موقع التسليم</label> <input type="text" id="dropLocation" placeholder="عدن" required>
+      </div><button type="submit" class="btn btn-primary" id="createOrderBtn"> <span id="createOrderBtnText">إنشاء الطلب</span> </button>
+     </form>
+    </div>
+    <div class="dashboard-section">
+     <h3>📋 الطلبات الأخيرة</h3>
+     <div class="orders-list" id="agentOrders">
+      <!-- Example/demo orders removed. Orders received from the System will be rendered here. -->
+      <div class="empty-note">لا توجد طلبات جديدة حالياً</div>
      </div>
+    </div>
     </div><!-- Merchant Dashboard -->
     <div id="merchantDashboard" class="role-dashboard hidden">
      <div class="stats-grid">
@@ -1384,35 +1384,13 @@
        </div>
       </div>
      </div>
-     <div class="dashboard-section">
-      <h3>📦 الطلبات الجديدة</h3>
-      <div class="orders-list">
-       <div class="order-card">
-        <div class="order-header"><span class="order-id">#ORD-789</span> <span class="status-badge status-active">طلب جديد</span>
-        </div>
-        <div class="order-details">
-         <p>👤 العميل: أحمد محمد</p>
-         <p>📦 المنتجات: 5 قطع</p>
-         <p>💰 الإجمالي: 8,500 ريال</p>
-         <p>📅 التاريخ: منذ ساعتين</p>
-        </div>
-        <div class="order-actions"><button class="btn-action btn-primary">قبول</button> <button class="btn-action btn-secondary">رفض</button>
-        </div>
-       </div>
-       <div class="order-card">
-        <div class="order-header"><span class="order-id">#ORD-788</span> <span class="status-badge status-active">قيد التجهيز</span>
-        </div>
-        <div class="order-details">
-         <p>👤 العميل: فاطمة علي</p>
-         <p>📦 المنتجات: 3 قطع</p>
-         <p>💰 الإجمالي: 5,200 ريال</p>
-         <p>📅 التاريخ: منذ 4 ساعات</p>
-        </div>
-        <div class="order-actions"><button class="btn-action btn-primary">جاهز للشحن</button>
-        </div>
-       </div>
-      </div>
+    <div class="dashboard-section">
+     <h3>📦 الطلبات الجديدة</h3>
+     <div class="orders-list" id="merchantOrders">
+      <!-- Example/demo orders removed. Orders received from the System will be rendered here. -->
+      <div class="empty-note">لا توجد طلبات جديدة حالياً</div>
      </div>
+    </div>
     </div><!-- Driver Dashboard -->
     <div id="driverDashboard" class="role-dashboard hidden">
      <div class="stats-grid">
@@ -1463,33 +1441,13 @@
      </div>
      <div class="availability-toggle"><label class="toggle-switch"> <input type="checkbox" id="driverAvailable" checked onchange="toggleAvailability()"> <span class="toggle-slider"></span> </label> <span class="toggle-label">متاح للعمل الآن</span>
      </div>
-     <div class="dashboard-section">
-      <h3>🚗 الطلبات المتاحة</h3>
-      <div class="orders-list">
-       <div class="order-card">
-        <div class="order-header"><span class="order-id">#TRIP-456</span> <span class="status-badge status-active">متاح</span>
-        </div>
-        <div class="order-details">
-         <p>📍 المسار: صنعاء - عدن</p>
-         <p>📏 المسافة: 365 كم</p>
-         <p>💰 الأجرة: 15,000 ريال</p>
-         <p>📦 الحمولة: متوسطة</p>
-         <p>📅 موعد الاستلام: غداً 8:00 ص</p>
-        </div>
-        <div class="order-actions"><button class="btn-action btn-primary">قبول الطلب</button>
-        </div>
-       </div>
-       <div class="order-card">
-        <div class="order-header"><span class="order-id">#TRIP-455</span> <span class="status-badge status-active">متاح</span>
-        </div>
-        <div class="order-details">
-         <p>📍 المسار: تعز - إب</p>
-         <p>📏 المسافة: 85 كم</p>
-         <p>💰 الأجرة: 5,500 ريال</p>
-         <p>📦 الحمولة: خفيفة</p>
-         <p>📅 موعد الاستلام: اليوم 2:00 م</p>
-        </div>
-        <div class="order-actions"><button class="btn-action btn-primary">قبول الطلب</button>
+    <div class="dashboard-section">
+     <h3>🚚 طلبات للتوصيل</h3>
+     <div class="orders-list" id="driverOrders">
+      <!-- Example/demo orders removed. Orders received from the System will be rendered here. -->
+      <div class="empty-note">لا توجد طلبات جديدة حالياً</div>
+     </div>
+    </div>
         </div>
        </div>
       </div>
@@ -2103,25 +2061,36 @@
       adminBtn.disabled = true;
       adminBtnText.innerHTML = '<span class="loading-spinner"></span>';
 
-      await new Promise(resolve => setTimeout(resolve, 500));
+      try {
+        // Call secure backend validation instead of hardcoded credentials
+        const resp = await fetch('/.netlify/functions/validateAdmin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
 
-      const adminUsername = defaultConfig.admin_username;
-      const adminPassword = defaultConfig.admin_password;
+        const result = await resp.json();
 
-      if (username === adminUsername && password === adminPassword) {
-        currentUser = { role: 'admin', name: 'المسؤول' };
-        showMessage('adminLoginMessage', '✅ تم تسجيل الدخول بنجاح!', false);
-        
+        if (result.isOk) {
+          currentUser = { role: 'admin', name: 'المسؤول' };
+          showMessage('adminLoginMessage', '✅ تم تسجيل الدخول بنجاح!', false);
+          
+          adminBtn.disabled = false;
+          adminBtnText.textContent = 'دخول';
+          
+          setTimeout(() => {
+            showDashboard(currentUser);
+          }, 1000);
+        } else {
+          adminBtn.disabled = false;
+          adminBtnText.textContent = 'دخول';
+          showMessage('adminLoginMessage', '❌ اسم المستخدم أو كلمة المرور غير صحيحة', true);
+        }
+      } catch (error) {
+        console.error('Admin login error:', error);
         adminBtn.disabled = false;
         adminBtnText.textContent = 'دخول';
-        
-        setTimeout(() => {
-          showDashboard(currentUser);
-        }, 1000);
-      } else {
-        adminBtn.disabled = false;
-        adminBtnText.textContent = 'دخول';
-        showMessage('adminLoginMessage', '❌ اسم المستخدم أو كلمة المرور غير صحيحة', true);
+        showMessage('adminLoginMessage', '❌ خطأ في الاتصال. حاول مرة أخرى', true);
       }
       
       return false;
@@ -2197,6 +2166,70 @@
         }, 1500);
       } else {
         showMessage('editUserMessage', '❌ حدث خطأ. حاول مرة أخرى', true);
+      }
+
+      return false;
+    }
+
+    // Order Creation Function
+    async function handleCreateOrder(event) {
+      event.preventDefault();
+
+      if (!currentUser || currentUser.role !== 'agent') {
+        showMessage('createOrderMessage', '❌ فقط الوكلاء يمكنهم إنشاء طلبات', true);
+        return false;
+      }
+
+      const goodsType = document.getElementById('goodsType').value.trim();
+      const weight = parseFloat(document.getElementById('orderWeight').value);
+      const price = parseFloat(document.getElementById('orderPrice').value);
+      const pickupLocation = document.getElementById('pickupLocation').value.trim();
+      const dropLocation = document.getElementById('dropLocation').value.trim();
+
+      if (!goodsType || !weight || !price || !pickupLocation || !dropLocation) {
+        showMessage('createOrderMessage', '❌ الرجاء ملء جميع الحقول', true);
+        return false;
+      }
+
+      const btn = document.getElementById('createOrderBtn');
+      const btnText = document.getElementById('createOrderBtnText');
+      btn.disabled = true;
+      btnText.innerHTML = '<span class="loading-spinner"></span>';
+
+      try {
+        const order = {
+          agent_id: currentUser.user_id,
+          goods_type: goodsType,
+          weight: weight,
+          price: price,
+          pickup_location: pickupLocation,
+          drop_location: dropLocation,
+          created_at: new Date().toISOString()
+        };
+
+        const resp = await fetch('/.netlify/functions/createOrder', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(order)
+        });
+
+        const result = await resp.json();
+
+        if (result.isOk) {
+          showMessage('createOrderMessage', '✅ تم إنشاء الطلب بنجاح! معرّف الطلب: ' + result.order.order_id, false);
+          event.target.reset();
+          setTimeout(() => {
+            document.getElementById('createOrderMessage').innerHTML = '';
+          }, 4000);
+        } else {
+          showMessage('createOrderMessage', '❌ فشل إنشاء الطلب: ' + (result.error?.message || 'خطأ غير معروف'), true);
+        }
+      } catch (error) {
+        console.error('Order creation error:', error);
+        showMessage('createOrderMessage', '❌ خطأ في الاتصال. حاول مرة أخرى', true);
+      } finally {
+        btn.disabled = false;
+        btnText.textContent = 'إنشاء الطلب';
       }
 
       return false;
@@ -2354,7 +2387,128 @@
       }, 3000);
     }
 
-    initializeApp();
+</script>
+  <script>
+    // Orders rendering + notification integration
+    (function(){
+      const notificationAudio = new Audio('notification.mp3');
+
+      function playNotification() {
+        try {
+          // try to play, ignore any exceptions (autoplay policy may block until user gesture)
+          notificationAudio.currentTime = 0;
+          notificationAudio.play().catch(()=>{});
+        } catch (e) {
+          // no-op
+        }
+      }
+
+      function createOrderCard(order) {
+        const card = document.createElement('div');
+        card.className = 'order-card';
+
+        const header = document.createElement('div');
+        header.className = 'order-header';
+        const idSpan = document.createElement('span');
+        idSpan.className = 'order-id';
+        idSpan.textContent = order.order_id || order.id || ('#' + (order.reference || ''));
+        header.appendChild(idSpan);
+        if (order.status) {
+          const status = document.createElement('span');
+          status.className = 'status-badge status-active';
+          status.textContent = order.status;
+          header.appendChild(document.createTextNode(' '));
+          header.appendChild(status);
+        }
+        card.appendChild(header);
+
+        const details = document.createElement('div');
+        details.className = 'order-details';
+        if (order.from || order.to) {
+          const p = document.createElement('p');
+          p.textContent = `📍 من: ${order.from || '-'} - إلى: ${order.to || '-'}`;
+          details.appendChild(p);
+        }
+        if (order.customer) {
+          const p = document.createElement('p');
+          p.textContent = `👤 العميل: ${order.customer}`;
+          details.appendChild(p);
+        }
+        if (order.items) {
+          const p = document.createElement('p');
+          p.textContent = `📦 المنتجات: ${order.items}`;
+          details.appendChild(p);
+        }
+        if (order.total || order.amount) {
+          const p = document.createElement('p');
+          p.textContent = `💰 المبلغ: ${order.total || order.amount}`;
+          details.appendChild(p);
+        }
+        if (order.when || order.date) {
+          const p = document.createElement('p');
+          p.textContent = `📅 التاريخ: ${order.when || order.date}`;
+          details.appendChild(p);
+        }
+        card.appendChild(details);
+
+        if (order.actions && Array.isArray(order.actions)) {
+          const actions = document.createElement('div');
+          actions.className = 'order-actions';
+          order.actions.forEach(a => {
+            const btn = document.createElement('button');
+            btn.className = 'btn-action btn-primary';
+            btn.textContent = a.label || 'Action';
+            if (typeof a.onClick === 'function') btn.addEventListener('click', () => a.onClick(order));
+            actions.appendChild(btn);
+          });
+          card.appendChild(actions);
+        }
+
+        return card;
+      }
+
+      function renderOrders(containerId, orders) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        container.innerHTML = '';
+        if (!orders || orders.length === 0) {
+          const empty = document.createElement('div');
+          empty.className = 'empty-note';
+          empty.textContent = 'لا توجد طلبات جديدة حالياً';
+          container.appendChild(empty);
+          return;
+        }
+        orders.forEach(o => container.appendChild(createOrderCard(o)));
+      }
+
+      function handleSystemOrder(order, role) {
+        // role can be 'agent', 'merchant', 'driver' — defaults to agent
+        const map = { agent: 'agentOrders', merchant: 'merchantOrders', driver: 'driverOrders' };
+        const targetId = map[role] || 'agentOrders';
+        const container = document.getElementById(targetId);
+        if (!container) return;
+        // remove empty-note if present
+        const empty = container.querySelector('.empty-note');
+        if (empty) empty.remove();
+        // prepend
+        const card = createOrderCard(order);
+        if (container.firstChild) container.insertBefore(card, container.firstChild);
+        else container.appendChild(card);
+        // play notification
+        playNotification();
+      }
+
+      // expose helpers for System integration
+      window.renderOrders = renderOrders;
+      window.handleSystemOrder = handleSystemOrder;
+
+      // convenience: if there's a global 'System' that emits 'order' events, try to hook it
+      try {
+        if (window.System && typeof window.System.on === 'function') {
+          window.System.on('order', (order) => handleSystemOrder(order, order.role));
+        }
+      } catch (e) {}
+    })();
   </script>
  <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9a5ca88d827b8e31',t:'MTc2NDM2MjE5Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
